@@ -164,29 +164,29 @@ BodyRegion *BodyRegion::addAttachedRegion(std::string name, float sizeWeight) {
  */
 BodyRegion *BodyRegion::subdivideIntoParts(string name, float sizeFraction, int numberOfSubdivisions, bool useLeftRight) {
     float areaPerSubdivision = sizeFraction / numberOfSubdivisions;
-    if (!positionName.empty())
-        positionName += ' ';
     for (int i = 0; i < numberOfSubdivisions; i++) {
         string subdivisionName = positionName;
+        string childPositionName;
         if (numberOfSubdivisions == 3 && useLeftRight) {
             if (i == 0) {
-                subdivisionName += "left ";
+                childPositionName = "left";
             } else if (i == 1) {
-                subdivisionName += "middle ";
+                childPositionName = "middle";
             } else if (i == 2) {
-                subdivisionName += "right ";
+                childPositionName = "right";
             }
         } else if (numberOfSubdivisions == 2 && useLeftRight) {
             if (i == 0) {
-                subdivisionName += "left ";
+                childPositionName = "left";
             } else {
-                subdivisionName += "right ";
+                childPositionName = "right";
             }
         } else {
-            subdivisionName += toOrdinal(i) + ' ';
+            childPositionName = toOrdinal(i);
         }
-        subdivisionName += name;
-        this->addSubRegion(subdivisionName, areaPerSubdivision);
+        concatenateWord(subdivisionName, childPositionName);
+        concatenateWord(subdivisionName, name);
+        auto leg = this->addSubRegion(subdivisionName, areaPerSubdivision);
     }
 }
 

@@ -21,7 +21,7 @@ t randomChoiceFromVector(std::vector<t> vector);
 std::string toSentenceCase(std::string in);
 std::string toLowercase(std::string in);
 std::string toOrdinal(int in);
-std::string concatenateWord(std::string sentence, std::string word);
+std::string concatenateWord(std::string& sentence, std::string word);
 
 
 #endif //HEADSPACE_UTILITIES_H

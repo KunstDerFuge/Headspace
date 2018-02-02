@@ -100,8 +100,9 @@ std::string toOrdinal(int in) {
     return "ERROR";
 }
 
-std::string concatenateWord(std::string sentence, std::string word) {
+std::string concatenateWord(std::string& sentence, std::string word) {
     if (!sentence.empty())
         sentence += ' ';
-    return sentence + word;
+    sentence += word;
+    return sentence;
 }
