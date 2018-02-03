@@ -21,6 +21,7 @@ static const char* str_cephalopod_foot = "Foot";
 static const char* str_tentacles = "Tentacles";
 static const char* str_wings = "Wings";
 static const char* str_eyes = "Eyes";
+static const char* str_eye = "Eye";
 static const char* str_neck = "Neck";
 
 // Single limbs
@@ -29,5 +30,11 @@ static const char* str_upper_leg = "Upper leg";
 static const char* str_lower_leg = "Lower leg";
 static const char* str_foot = "Foot";
 static const char* str_arm = "Arm";
+static const char* str_upper_arm = "Upper arm";
+static const char* str_lower_arm = "Lower arm";
+static const char* str_hand = "Hand";
+static const char* str_palm = "Palm";
+static const char* str_fingers = "Fingers";
+static const char* str_finger = "Finger";
 
 #endif //HEADSPACE_STRINGS_H

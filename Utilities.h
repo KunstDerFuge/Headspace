@@ -9,6 +9,7 @@
 #include <string>
 
 int randomChoiceOfN(int n);
+int randomFromXToY(int x, int y);
 float randomFloatZeroToN(float n);
 float randomSampleNormal(float, float);
 float randomSampleNormal(float mean, float dev, float min, float max);

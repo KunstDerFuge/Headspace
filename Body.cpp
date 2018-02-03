@@ -13,8 +13,7 @@
 
 using namespace std;
 
-Body::Body(std::list<BodyPart*> &parts, std::list<BodyRegion*> &regions, float size) {
-    bodyRegions = regions;
+Body::Body(float size) {
     this->size = size;
 
     int totalWeight = 0;
@@ -33,18 +32,43 @@ void Body::generateParts(float size, int locomotion, int composition) {
             auto legs = addBodyRegion(str_legs, 4);
 
             // Head
-            auto eyes = head->addSubRegion(str_eyes, 0.1);
+            int numberOfEyes = randomFromXToY(0, 3);
+            if (numberOfEyes != 0) {
+                auto eyes = head->addSubRegion(str_eyes, 0.1);
+                auto eyesPhysical = eyes->subdivideIntoParts(str_eye, 1.f, numberOfEyes, true);
+                for (auto eye : eyesPhysical)
+                    eye->addAbility(vision, 0.6);
+            }
             auto neck = head->addSubRegion(str_neck, 0.2);
+            setAsRoot(head);
             head->connectExistingRegion(neck);
 
             // Torso
             auto upperBody = torso->addSubRegion(str_upper_body, 0.5);
-            neck->connectExistingRegion(upperBody);
             auto lowerBody = torso->addSubRegion(str_lower_body, 0.5);
+            neck->connectExistingRegion(upperBody);
             upperBody->connectExistingRegion(lowerBody);
 
             // Arms
-            upperBody->attachSymmetricalLimbs(str_arm, 3.f, 2, true);
+            auto arms = upperBody->subdivideIntoParts(str_arm, 0.4, 2, true);
+            for (auto arm : arms) {
+                auto upperArm = arm->addSubRegion(str_upper_arm, 0.45);
+                auto lowerArm = arm->addSubRegion(str_lower_arm, 0.45);
+                auto hand = arm->addSubRegion(str_hand, 0.1);
+                auto palm = hand->addSubRegion(str_palm, 0.5);
+                auto fingers = hand->addSubRegion(str_fingers, 0.5);
+                int numFingers = randomFromXToY(2, 6);
+                auto fingersLimbs = fingers->subdivideIntoParts(str_finger, 1.f, numFingers, false);
+                upperBody->connectExistingRegion(upperArm)
+                        ->connectExistingRegion(lowerArm)
+                        ->connectExistingRegion(hand);
+                for (auto finger : fingersLimbs) {
+                    palm->connectExistingRegion(finger);
+                    finger->addAbility(grasp, 0.3);
+                }
+                lowerArm->connectExistingRegion(palm);
+                lowerArm->addAbility(movement, 0.2);
+            }
 
             // Legs
             auto legsLimbs = legs->subdivideIntoParts(str_leg, 1.f, 2, true);
@@ -54,18 +78,31 @@ void Body::generateParts(float size, int locomotion, int composition) {
                 auto upperLeg = leg->addSubRegion(str_upper_leg, 0.48);
                 auto lowerLeg = leg->addSubRegion(str_lower_leg, 0.48);
                 auto foot = leg->addSubRegion(str_foot, 0.04);
-                lowerBody->connectExistingRegion(upperLeg);
                 upperLeg->connectExistingRegion(lowerLeg);
                 lowerLeg->connectExistingRegion(foot);
+                foot->addAbility(movement, 0.6);
             }
 
             break;
         }
 
         case LOCOMOTION_QUADRUPEDAL: {
-            auto head = addBodyRegion(str_head, 2);
-            auto torso = addBodyRegion(str_torso, 1);
+            auto head = addBodyRegion(str_head, 1);
+            auto torso = addBodyRegion(str_torso, 3);
             auto legs = addBodyRegion(str_legs, 2);
+
+            // Head
+            auto eyes = head->addSubRegion(str_eyes, 0.1);
+            auto neck = head->addSubRegion(str_neck, 0.4);
+            setAsRoot(head);
+            head->connectExistingRegion(neck);
+
+            // Torso
+            auto upperBody = torso->addSubRegion(str_upper_body, 0.5);
+            auto lowerBody = torso->addSubRegion(str_lower_body, 0.5);
+            neck->connectExistingRegion(upperBody);
+            upperBody->connectExistingRegion(lowerBody);
+
             break;
         }
 
@@ -163,13 +200,12 @@ BodyRegion *BodyRegion::addSubRegion(std::string name, float sizeFraction, std::
 }
 
 /*
- * Add an attached region to this body region. Attached regions do not overlap at all, and their size is a weighted
- * value that will be normalized at the end of creation. If the 'head' region has weight 1, and an 'upperBody'
- * region has weight 4, the upper body's target area is equivalent to four heads. The creature's total size will then be
- * distributed amongst its regions accordingly.
+ * Add an attached region to this body region. Attached regions do not overlap at all, and their size is a fraction of
+ * its parent's area. If the 'head' region has weight 1, and an 'upperBody' region has weight 4, the upper body's target
+ * area is equivalent to four heads. The creature's total size will then be distributed amongst its regions accordingly.
  */
-BodyRegion *BodyRegion::addAttachedRegion(std::string name, float sizeWeight) {
-    auto attachment = new BodyRegion(name, sizeWeight);
+BodyRegion *BodyRegion::addAttachedRegion(std::string name, float sizeFraction) {
+    auto attachment = new BodyRegion(name, sizeFraction);
     this->attachedRegions.push_back(attachment);
     return attachment;
 }
@@ -192,21 +228,13 @@ list<BodyRegion*> BodyRegion::subdivideIntoParts(string name, float sizeFraction
     return parts;
 }
 
-list<BodyRegion*> BodyRegion::attachSymmetricalLimbs(std::string name, float sizeWeightPerEach, int numberOfLimbs, bool useLeftRight) {
-    list<BodyRegion*> limbs;
-    for (int i = 0; i < numberOfLimbs; i++) {
-        string limbName = this->positionName;
-        string limbPositionName = namePosition(i, numberOfLimbs, useLeftRight);
-        concatenateWord(limbName, limbPositionName);
-        concatenateWord(limbName, name);
-        limbs.push_back(this->addAttachedRegion(limbName, sizeWeightPerEach));
-    }
-    return limbs;
-}
-
 BodyRegion *BodyRegion::connectExistingRegion(BodyRegion *child) {
     this->attachedRegions.push_back(child);
     return child;
+}
+
+void BodyRegion::addAbility(AbilityTag ability, float factor) {
+    abilityTags.insert( {ability, factor} );
 }
 
 void BodyPart::addChild(BodyRegion* child) {

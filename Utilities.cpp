@@ -125,3 +125,7 @@ std::string namePosition(int position, int numberOfPositions, bool useLeftRight)
     }
     return toOrdinal(position);
 }
+
+int randomFromXToY(int x, int y) {
+    return randomChoiceOfN(y-x + 1) + x;
+}

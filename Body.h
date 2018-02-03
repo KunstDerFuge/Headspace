@@ -7,6 +7,9 @@
 
 #include <list>
 #include <string>
+#include <set>
+
+#include "Creature.h"
 
 struct BodyRegion;
 
@@ -62,23 +65,24 @@ struct BodyRegion {
     std::list<BodyPart*> parts;
     std::list<BodyRegion*> subRegions;
     std::list<BodyRegion*> attachedRegions;
+    std::set<std::pair<AbilityTag, float>> abilityTags;
     float emptySpaceFactor;
     float size;
     std::string name;
     std::string positionName;
 
     BodyRegion* addSubRegion(std::string name, float sizeFraction, std::string positionName="");
-    BodyRegion* addAttachedRegion(std::string name, float sizeWeight);
+    BodyRegion* addAttachedRegion(std::string name, float sizeFraction);
     BodyRegion* connectExistingRegion(BodyRegion* child);
     std::list<BodyRegion*> subdivideIntoParts(std::string name, float sizeFraction, int numberOfSubdivisions, bool useLeftRight);
-    std::list<BodyRegion*> attachSymmetricalLimbs(std::string name, float sizeWeight, int numberOfLimbs, bool useLeftRight);
+    void addAbility(AbilityTag ability, float factor);
 };
 
 struct Body {
 /*
  * A body is composed of a group of targetable body regions.
  */
-    Body(std::list<BodyPart*>&, std::list<BodyRegion*>&, float);
+    Body(float);
     std::list<BodyRegion*> bodyRegions;
     BodyRegion* root;
 
