@@ -34,17 +34,26 @@ void Body::generateParts(float size, int locomotion, int composition) {
 
             // Head
             auto eyes = head->addSubRegion(str_eyes, 0.1);
+            auto neck = head->addSubRegion(str_neck, 0.2);
+            head->connectExistingRegion(neck);
 
             // Torso
             auto upperBody = torso->addSubRegion(str_upper_body, 0.5);
+            neck->connectExistingRegion(upperBody);
             auto lowerBody = torso->addSubRegion(str_lower_body, 0.5);
+            upperBody->connectExistingRegion(lowerBody);
 
             // Legs
             legs->subdivideIntoParts(str_leg, 1.f, 2, true);
             legs->emptySpaceFactor = 0.3;
 
             for (auto leg : legs->subRegions) {
-                //leg->addSubRegion()
+                auto upperLeg = leg->addSubRegion(str_upper_leg, 0.48);
+                auto lowerLeg = leg->addSubRegion(str_lower_leg, 0.48);
+                auto foot = leg->addSubRegion(str_foot, 0.04);
+                lowerBody->connectExistingRegion(upperLeg);
+                upperLeg->connectExistingRegion(lowerLeg);
+                lowerLeg->connectExistingRegion(foot);
             }
 
             break;
@@ -128,6 +137,10 @@ void Body::addBodyPart(BodyPart *part) {
 
 }
 
+void Body::setAsRoot(BodyRegion* root) {
+    this->root = root;
+}
+
 BodyRegion::BodyRegion(std::string name, float sizeWeight) {
     this->name = name;
     this->size = size;
@@ -141,6 +154,7 @@ BodyRegion::BodyRegion(std::string name, float sizeWeight) {
 BodyRegion *BodyRegion::addSubRegion(std::string name, float sizeFraction, std::string positionName) {
     auto child = new BodyRegion(name, sizeFraction);
     child->positionName = concatenateWord(this->positionName, positionName);
+    child->name = concatenateWord(child->positionName, child->name);
     this->subRegions.push_back(child);
     return child;
 }
@@ -162,31 +176,24 @@ BodyRegion *BodyRegion::addAttachedRegion(std::string name, float sizeWeight) {
  * of the parent's area that the entire group takes up. In most cases this will be 1.0 unless there is another type of
  * limb subdividing the same region.
  */
-BodyRegion *BodyRegion::subdivideIntoParts(string name, float sizeFraction, int numberOfSubdivisions, bool useLeftRight) {
+BodyRegion* BodyRegion::subdivideIntoParts(string name, float sizeFraction, int numberOfSubdivisions, bool useLeftRight) {
     float areaPerSubdivision = sizeFraction / numberOfSubdivisions;
     for (int i = 0; i < numberOfSubdivisions; i++) {
-        string subdivisionName = positionName;
-        string childPositionName;
-        if (numberOfSubdivisions == 3 && useLeftRight) {
-            if (i == 0) {
-                childPositionName = "left";
-            } else if (i == 1) {
-                childPositionName = "middle";
-            } else if (i == 2) {
-                childPositionName = "right";
-            }
-        } else if (numberOfSubdivisions == 2 && useLeftRight) {
-            if (i == 0) {
-                childPositionName = "left";
-            } else {
-                childPositionName = "right";
-            }
-        } else {
-            childPositionName = toOrdinal(i);
-        }
+        string subdivisionName = this->positionName; // Don't overwrite this->positionName (concatenateWord on copy)
+        string childPositionName = namePosition(i, numberOfSubdivisions, useLeftRight);
         concatenateWord(subdivisionName, childPositionName);
         concatenateWord(subdivisionName, name);
-        auto leg = this->addSubRegion(subdivisionName, areaPerSubdivision);
+        this->addSubRegion(subdivisionName, areaPerSubdivision);
+    }
+}
+
+BodyRegion* BodyRegion::attachSymmetricalLimbs(std::string name, float sizeWeightPerEach, int numberOfLimbs, bool useLeftRight) {
+    for (int i = 0; i < numberOfLimbs; i++) {
+        string limbName = this->positionName;
+        string limbPositionName = namePosition(i, numberOfLimbs, useLeftRight);
+        concatenateWord(limbName, limbPositionName);
+        concatenateWord(limbName, name);
+        this->addAttachedRegion(limbName, sizeWeightPerEach);
     }
 }
 

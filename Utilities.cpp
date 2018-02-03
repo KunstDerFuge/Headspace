@@ -106,3 +106,22 @@ std::string concatenateWord(std::string& sentence, std::string word) {
     sentence += word;
     return sentence;
 }
+
+std::string namePosition(int position, int numberOfPositions, bool useLeftRight) {
+    if (numberOfPositions == 3 && useLeftRight) {
+        if (position == 0) {
+            return "left";
+        } else if (position == 1) {
+            return "middle";
+        } else if (position == 2) {
+            return "right";
+        }
+    } else if (numberOfPositions == 2 && useLeftRight) {
+        if (position == 0) {
+            return "left";
+        } else {
+            return "right";
+        }
+    }
+    return toOrdinal(position);
+}

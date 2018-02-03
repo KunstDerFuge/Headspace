@@ -70,7 +70,8 @@ struct BodyRegion {
     BodyRegion* addSubRegion(std::string name, float sizeFraction, std::string positionName="");
     BodyRegion* addAttachedRegion(std::string name, float sizeWeight);
     BodyRegion* connectExistingRegion(BodyRegion* child);
-    BodyRegion* subdivideIntoParts(std::string name, float sizeWeight, int numberOfSubdivisions, bool useLeftRight);
+    BodyRegion* subdivideIntoParts(std::string name, float sizeFraction, int numberOfSubdivisions, bool useLeftRight);
+    BodyRegion* attachSymmetricalLimbs(std::string name, float sizeWeight, int numberOfLimbs, bool useLeftRight);
 };
 
 struct Body {
@@ -79,9 +80,11 @@ struct Body {
  */
     Body(std::list<BodyPart*>&, std::list<BodyRegion*>&, float);
     std::list<BodyRegion*> bodyRegions;
+    BodyRegion* root;
 
     void generateParts(float size, int locomotion, int composition);
     BodyRegion* addBodyRegion(std::string name, float sizeWeight);
+    void setAsRoot(BodyRegion* root);
     void addBodyPart(BodyPart* part);
     void calculateWeight();
     float size;

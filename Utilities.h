@@ -22,6 +22,7 @@ std::string toSentenceCase(std::string in);
 std::string toLowercase(std::string in);
 std::string toOrdinal(int in);
 std::string concatenateWord(std::string& sentence, std::string word);
+std::string namePosition(int position, int numberOfPositions, bool useLeftRight);
 
 
 #endif //HEADSPACE_UTILITIES_H
