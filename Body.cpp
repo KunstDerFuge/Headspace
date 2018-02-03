@@ -43,11 +43,14 @@ void Body::generateParts(float size, int locomotion, int composition) {
             auto lowerBody = torso->addSubRegion(str_lower_body, 0.5);
             upperBody->connectExistingRegion(lowerBody);
 
+            // Arms
+            upperBody->attachSymmetricalLimbs(str_arm, 3.f, 2, true);
+
             // Legs
-            legs->subdivideIntoParts(str_leg, 1.f, 2, true);
+            auto legsLimbs = legs->subdivideIntoParts(str_leg, 1.f, 2, true);
             legs->emptySpaceFactor = 0.3;
 
-            for (auto leg : legs->subRegions) {
+            for (auto leg : legsLimbs) {
                 auto upperLeg = leg->addSubRegion(str_upper_leg, 0.48);
                 auto lowerLeg = leg->addSubRegion(str_lower_leg, 0.48);
                 auto foot = leg->addSubRegion(str_foot, 0.04);
@@ -176,25 +179,29 @@ BodyRegion *BodyRegion::addAttachedRegion(std::string name, float sizeWeight) {
  * of the parent's area that the entire group takes up. In most cases this will be 1.0 unless there is another type of
  * limb subdividing the same region.
  */
-BodyRegion* BodyRegion::subdivideIntoParts(string name, float sizeFraction, int numberOfSubdivisions, bool useLeftRight) {
+list<BodyRegion*> BodyRegion::subdivideIntoParts(string name, float sizeFraction, int numberOfSubdivisions, bool useLeftRight) {
     float areaPerSubdivision = sizeFraction / numberOfSubdivisions;
+    list<BodyRegion*> parts;
     for (int i = 0; i < numberOfSubdivisions; i++) {
         string subdivisionName = this->positionName; // Don't overwrite this->positionName (concatenateWord on copy)
         string childPositionName = namePosition(i, numberOfSubdivisions, useLeftRight);
         concatenateWord(subdivisionName, childPositionName);
         concatenateWord(subdivisionName, name);
-        this->addSubRegion(subdivisionName, areaPerSubdivision);
+        parts.push_back(this->addSubRegion(subdivisionName, areaPerSubdivision));
     }
+    return parts;
 }
 
-BodyRegion* BodyRegion::attachSymmetricalLimbs(std::string name, float sizeWeightPerEach, int numberOfLimbs, bool useLeftRight) {
+list<BodyRegion*> BodyRegion::attachSymmetricalLimbs(std::string name, float sizeWeightPerEach, int numberOfLimbs, bool useLeftRight) {
+    list<BodyRegion*> limbs;
     for (int i = 0; i < numberOfLimbs; i++) {
         string limbName = this->positionName;
         string limbPositionName = namePosition(i, numberOfLimbs, useLeftRight);
         concatenateWord(limbName, limbPositionName);
         concatenateWord(limbName, name);
-        this->addAttachedRegion(limbName, sizeWeightPerEach);
+        limbs.push_back(this->addAttachedRegion(limbName, sizeWeightPerEach));
     }
+    return limbs;
 }
 
 BodyRegion *BodyRegion::connectExistingRegion(BodyRegion *child) {

@@ -28,5 +28,6 @@ static const char* str_leg = "Leg";
 static const char* str_upper_leg = "Upper leg";
 static const char* str_lower_leg = "Lower leg";
 static const char* str_foot = "Foot";
+static const char* str_arm = "Arm";
 
 #endif //HEADSPACE_STRINGS_H
