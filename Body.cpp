@@ -2,9 +2,9 @@
 // Created by KunstDerFuge on 1/24/18.
 //
 
-#include <list>
 #include <vector>
 #include <string>
+#include <iostream>
 
 #include "Body.h"
 #include "Creature.h"
@@ -32,12 +32,19 @@ void Body::generateParts(float size, int locomotion, int composition) {
             auto legs = addBodyRegion(str_legs, 4);
 
             // Head
+            float hearingSharpness = randomSampleNormal(0.8, 0.2, 0.f, 1.f);
+            float smellingSharpness = randomSampleNormal(0.5, 0.2, 0.f, 1.f);
+            float biteAptitude = randomSampleNormal(0.2, 0.1, 0.f, 1.f);
+            head->addAbility(hearing, hearingSharpness);
+            head->addAbility(smell, smellingSharpness);
+            head->addAbility(bite, biteAptitude);
             int numberOfEyes = randomFromXToY(0, 3);
             if (numberOfEyes != 0) {
+                float visionSharpnessPerEye = randomSampleNormal(0.6, 0.2, 0.f, 1.f);
                 auto eyes = head->addSubRegion(str_eyes, 0.1);
                 auto eyesPhysical = eyes->subdivideIntoParts(str_eye, 1.f, numberOfEyes, true);
                 for (auto eye : eyesPhysical)
-                    eye->addAbility(vision, 0.6);
+                    eye->addAbility(vision, visionSharpnessPerEye);
             }
             auto neck = head->addSubRegion(str_neck, 0.2);
             setAsRoot(head);
@@ -61,12 +68,11 @@ void Body::generateParts(float size, int locomotion, int composition) {
                 auto fingersLimbs = fingers->subdivideIntoParts(str_finger, 1.f, numFingers, false);
                 upperBody->connectExistingRegion(upperArm)
                         ->connectExistingRegion(lowerArm)
-                        ->connectExistingRegion(hand);
+                        ->connectExistingRegion(palm);
                 for (auto finger : fingersLimbs) {
                     palm->connectExistingRegion(finger);
-                    finger->addAbility(grasp, 0.3);
+                    finger->addAbility(grasp, 0.2);
                 }
-                lowerArm->connectExistingRegion(palm);
                 lowerArm->addAbility(movement, 0.2);
             }
 
@@ -78,9 +84,11 @@ void Body::generateParts(float size, int locomotion, int composition) {
                 auto upperLeg = leg->addSubRegion(str_upper_leg, 0.48);
                 auto lowerLeg = leg->addSubRegion(str_lower_leg, 0.48);
                 auto foot = leg->addSubRegion(str_foot, 0.04);
-                upperLeg->connectExistingRegion(lowerLeg);
-                lowerLeg->connectExistingRegion(foot);
+                lowerBody->connectExistingRegion(upperLeg)
+                    ->connectExistingRegion(lowerLeg)
+                    ->connectExistingRegion(foot);
                 foot->addAbility(movement, 0.6);
+                foot->addAbility(presence_vibration_detect, 0.05);
             }
 
             break;
@@ -160,7 +168,9 @@ void Body::generateParts(float size, int locomotion, int composition) {
 
 /*
  * Add a root-level body region to this body. Root-level regions will be shown to the user first when targeting,
- * e.g. 'Head', 'Body', 'Legs'.
+ * e.g. 'Head', 'Body', 'Legs'. SizeWeight represents the weighted portion of the creature's target area contained in
+ * this region. If the 'head' region has weight 1, and an 'upperBody' region has weight 4, the upper body's target area
+ * is equivalent to four heads. The creature's total size will then be distributed amongst its regions accordingly.
  */
 BodyRegion* Body::addBodyRegion(std::string name, float sizeWeight) {
     auto bodyRegion = new BodyRegion(name, sizeWeight);
@@ -169,7 +179,7 @@ BodyRegion* Body::addBodyRegion(std::string name, float sizeWeight) {
 }
 
 /*
- * Add a physical body part to this body region. If a region contains no body parts, it is an abstract aiming area,
+ * Add a physical body part to this body region. If a region contains no body parts, it is an abstract targeting area,
  * like 'Upper body'. Successful blows to an abstract region will land randomly on one of the sub-regions containing
  * physical parts.
  */
@@ -179,6 +189,26 @@ void Body::addBodyPart(BodyPart *part) {
 
 void Body::setAsRoot(BodyRegion* root) {
     this->root = root;
+}
+
+vector<BodyRegion*> Body::printWalkthrough(BodyRegion* region) {
+    int count = 0;
+    if (region != nullptr) {
+        if (region->subRegions.empty()) {
+            cout << "No subregions!" << endl;
+            return region->subRegions;
+        }
+        for (auto part : region->subRegions) {
+            cout << count << ": " << part->name << "(" << part->positionName << ")" << "[" << part->verbosePositionName << "]" << endl;
+            count++;
+        }
+        return region->subRegions;
+    }
+    for (auto part : bodyRegions) {
+        cout << count << ": " << part->name << endl;
+        count++;
+    }
+    return bodyRegions;
 }
 
 BodyRegion::BodyRegion(std::string name, float sizeWeight) {
@@ -193,16 +223,17 @@ BodyRegion::BodyRegion(std::string name, float sizeWeight) {
  */
 BodyRegion *BodyRegion::addSubRegion(std::string name, float sizeFraction, std::string positionName) {
     auto child = new BodyRegion(name, sizeFraction);
-    child->positionName = concatenateWord(this->positionName, positionName);
-    child->name = concatenateWord(child->positionName, child->name);
+    child->positionName = positionName;
+    child->verbosePositionName = concatenateWordToCopy(this->verbosePositionName, positionName);
+    child->name = concatenateWordToCopy(child->positionName, child->name);
+    toSentenceCase(child->name);
     this->subRegions.push_back(child);
     return child;
 }
 
 /*
  * Add an attached region to this body region. Attached regions do not overlap at all, and their size is a fraction of
- * its parent's area. If the 'head' region has weight 1, and an 'upperBody' region has weight 4, the upper body's target
- * area is equivalent to four heads. The creature's total size will then be distributed amongst its regions accordingly.
+ * its parent's area.
  */
 BodyRegion *BodyRegion::addAttachedRegion(std::string name, float sizeFraction) {
     auto attachment = new BodyRegion(name, sizeFraction);
@@ -213,17 +244,17 @@ BodyRegion *BodyRegion::addAttachedRegion(std::string name, float sizeFraction) 
 /*
  * Subdivide parent region into N equal parts, useful for groups of identical limbs. SizeFraction here is the fraction
  * of the parent's area that the entire group takes up. In most cases this will be 1.0 unless there is another type of
- * limb subdividing the same region.
+ * limb subdividing the same region. UseLeftRight determines whether the subregions will be differentiated by
+ * named positions left-center-right or first-second-third for groups of three or fewer.
  */
-list<BodyRegion*> BodyRegion::subdivideIntoParts(string name, float sizeFraction, int numberOfSubdivisions, bool useLeftRight) {
+vector<BodyRegion*> BodyRegion::subdivideIntoParts(string name, float sizeFraction, int numberOfSubdivisions, bool useLeftRight) {
     float areaPerSubdivision = sizeFraction / numberOfSubdivisions;
-    list<BodyRegion*> parts;
+    vector<BodyRegion*> parts;
     for (int i = 0; i < numberOfSubdivisions; i++) {
-        string subdivisionName = this->positionName; // Don't overwrite this->positionName (concatenateWord on copy)
+        string partName = name;
         string childPositionName = namePosition(i, numberOfSubdivisions, useLeftRight);
-        concatenateWord(subdivisionName, childPositionName);
-        concatenateWord(subdivisionName, name);
-        parts.push_back(this->addSubRegion(subdivisionName, areaPerSubdivision));
+        auto newPart = this->addSubRegion(partName, areaPerSubdivision, childPositionName);
+        parts.push_back(newPart);
     }
     return parts;
 }

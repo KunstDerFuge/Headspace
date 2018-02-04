@@ -4,6 +4,7 @@
 
 #include <random>
 #include <iostream>
+#include <algorithm>
 #include "Utilities.h"
 
 using namespace std;
@@ -59,16 +60,13 @@ bool randomBool() {
     return randomChoiceOfN(2) == 1;
 }
 
-string toLowercase(std::string in) {
-    for (char c : in)
-        tolower(c);
-    return in;
+void toLowercase(std::string& in) {
+    std::transform(in.begin(), in.end(), in.begin(), ::tolower);
 }
 
-string toSentenceCase(std::string in) {
-    in = toLowercase(in);
+void toSentenceCase(std::string& in) {
+    toLowercase(in);
     in[0] = toupper(in[0]);
-    return in;
 }
 
 std::string toOrdinal(int in) {
@@ -100,8 +98,23 @@ std::string toOrdinal(int in) {
     return "ERROR";
 }
 
-std::string concatenateWord(std::string& sentence, std::string word) {
-    if (!sentence.empty())
+void concatenateWord(std::string& sentence, std::string word) {
+    if (word.empty())
+        return;
+    char lastChar = sentence[sentence.size()-1];
+    if (!sentence.empty() && lastChar != ' ')
+        sentence += ' ';
+    sentence += word;
+}
+
+/*
+ * Same as concatenateWord, but doesn't modify the sentence, just returns the concatenated sentence.
+ */
+std::string concatenateWordToCopy(std::string sentence, std::string word) {
+    if (word.empty())
+        return sentence;
+    char lastChar = sentence[sentence.size()-1];
+    if (!sentence.empty() && lastChar != ' ')
         sentence += ' ';
     sentence += word;
     return sentence;

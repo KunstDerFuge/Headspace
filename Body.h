@@ -14,8 +14,8 @@
 struct BodyRegion;
 
 struct BodyPart {
-    std::list<BodyPart*> internalParts;
-    std::list<BodyRegion*> children;
+    std::vector<BodyPart*> internalParts;
+    std::vector<BodyRegion*> children;
     float absoluteSize;
     float weightedSize;
     float targetSize;
@@ -62,19 +62,20 @@ struct BodyRegion {
  * regions until landing on one or more actual body parts.
  */
     BodyRegion(std::string name, float size);
-    std::list<BodyPart*> parts;
-    std::list<BodyRegion*> subRegions;
-    std::list<BodyRegion*> attachedRegions;
+    std::vector<BodyPart*> parts;
+    std::vector<BodyRegion*> subRegions;
+    std::vector<BodyRegion*> attachedRegions;
     std::set<std::pair<AbilityTag, float>> abilityTags;
     float emptySpaceFactor;
     float size;
     std::string name;
     std::string positionName;
+    std::string verbosePositionName;
 
     BodyRegion* addSubRegion(std::string name, float sizeFraction, std::string positionName="");
     BodyRegion* addAttachedRegion(std::string name, float sizeFraction);
     BodyRegion* connectExistingRegion(BodyRegion* child);
-    std::list<BodyRegion*> subdivideIntoParts(std::string name, float sizeFraction, int numberOfSubdivisions, bool useLeftRight);
+    std::vector<BodyRegion*> subdivideIntoParts(std::string name, float sizeFraction, int numberOfSubdivisions, bool useLeftRight);
     void addAbility(AbilityTag ability, float factor);
 };
 
@@ -83,10 +84,11 @@ struct Body {
  * A body is composed of a group of targetable body regions.
  */
     Body(float);
-    std::list<BodyRegion*> bodyRegions;
+    std::vector<BodyRegion*> bodyRegions;
     BodyRegion* root;
 
     void generateParts(float size, int locomotion, int composition);
+    std::vector<BodyRegion*> printWalkthrough(BodyRegion* region=nullptr);
     BodyRegion* addBodyRegion(std::string name, float sizeWeight);
     void setAsRoot(BodyRegion* root);
     void addBodyPart(BodyPart* part);

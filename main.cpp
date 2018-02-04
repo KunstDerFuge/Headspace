@@ -18,8 +18,19 @@ int main() {
 //        cout << toOrdinal(i) << endl;
 
     auto body = new Body(10);
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 1; i++) {
         body->generateParts(100, LOCOMOTION_BIPEDAL, COMPOSITION_FLESH);
+    }
+    auto parts = body->printWalkthrough();
+
+    int selection;
+    while(true) {
+        cin >> selection;
+
+        parts = body->printWalkthrough(parts[selection]);
+
+        if (selection == -1)
+            break;
     }
 
     return 0;

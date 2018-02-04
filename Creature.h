@@ -36,8 +36,8 @@ static const int SIZE_MEDIUM = 2;
 static const int SIZE_LARGE = 3;
 static const int SIZE_COLOSSAL = 4;
 
-enum AbilityTag { vision, hearing, presence, scent,   // senses
-                    movement, flight, grasp,
+enum AbilityTag { vision, hearing, presence_vibration_detect, smell,   // senses
+                    movement, flight, grasp, tentacle_grasp,
                     bite, scratch, bash };
 
 class Body;

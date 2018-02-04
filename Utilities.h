@@ -19,10 +19,11 @@ bool randomBool();
 template<typename t>
 t randomChoiceFromVector(std::vector<t> vector);
 
-std::string toSentenceCase(std::string in);
-std::string toLowercase(std::string in);
+void toSentenceCase(std::string& in);
+void toLowercase(std::string& in);
 std::string toOrdinal(int in);
-std::string concatenateWord(std::string& sentence, std::string word);
+void concatenateWord(std::string& sentence, std::string word);
+std::string concatenateWordToCopy(std::string sentence, std::string word);
 std::string namePosition(int position, int numberOfPositions, bool useLeftRight);
 
 
