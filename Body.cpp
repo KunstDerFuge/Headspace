@@ -42,13 +42,13 @@ void Body::generateParts(float size, int locomotion, int composition) {
             head->generateEyes(0, 3, 0.1, 0.5, 0.2);
             auto neck = head->addSubRegion(str_neck, 0.2);
             setAsRoot(head);
-            head->connectExistingRegion(neck);
+            head->connectTo(neck);
 
             // Torso
             auto upperBody = torso->addSubRegion(str_upper_body, 0.5);
             auto lowerBody = torso->addSubRegion(str_lower_body, 0.5);
-            neck->connectExistingRegion(upperBody);
-            upperBody->connectExistingRegion(lowerBody);
+            neck->connectTo(upperBody);
+            upperBody->connectTo(lowerBody);
 
             // Arms
             auto armsPhysical = arms->subdivideIntoParts(str_arm, 1.f, 2, true);
@@ -60,11 +60,11 @@ void Body::generateParts(float size, int locomotion, int composition) {
                 auto fingers = hand->addSubRegion(str_fingers, 0.5);
                 int numFingers = randomFromXToY(2, 6);
                 auto fingersLimbs = fingers->subdivideIntoParts(str_finger, 1.f, numFingers, false);
-                upperBody->connectExistingRegion(upperArm)
-                        ->connectExistingRegion(lowerArm)
-                        ->connectExistingRegion(palm);
+                upperBody->connectTo(upperArm)
+                        ->connectTo(lowerArm)
+                        ->connectTo(palm);
                 for (auto finger : fingersLimbs) {
-                    palm->connectExistingRegion(finger);
+                    palm->connectTo(finger);
                     finger->addAbility(grasp, 0.2);
                 }
                 lowerArm->addAbility(movement, 0.2);
@@ -77,9 +77,9 @@ void Body::generateParts(float size, int locomotion, int composition) {
                 auto upperLeg = leg->addSubRegion(str_upper_leg, 0.48);
                 auto lowerLeg = leg->addSubRegion(str_lower_leg, 0.48);
                 auto foot = leg->addSubRegion(str_foot, 0.04);
-                lowerBody->connectExistingRegion(upperLeg)
-                    ->connectExistingRegion(lowerLeg)
-                    ->connectExistingRegion(foot);
+                lowerBody->connectTo(upperLeg)
+                        ->connectTo(lowerLeg)
+                        ->connectTo(foot);
                 foot->addAbility(movement, 0.6);
                 foot->addAbility(presence_vibration_detect, 0.05);
             }
@@ -93,16 +93,22 @@ void Body::generateParts(float size, int locomotion, int composition) {
             auto legs = addBodyRegion(str_legs, 2, 0.7);
 
             // Head
-            auto eyes = head->addSubRegion(str_eyes, 0.1);
-            auto neck = head->addSubRegion(str_neck, 0.4);
+            float hearingSharpness = randomSampleNormal(0.8, 0.2, 0.f, 1.f);
+            float smellingSharpness = randomSampleNormal(0.8, 0.2, 0.f, 1.f);
+            float biteAptitude = randomSampleNormal(0.7, 0.1, 0.f, 1.f);
+            head->addAbility(hearing, hearingSharpness);
+            head->addAbility(smell, smellingSharpness);
+            head->addAbility(bite, biteAptitude);
+            head->generateEyes(0, 4, 0.1, 0.4, 0.2);
             setAsRoot(head);
-            head->connectExistingRegion(neck);
+            auto neck = head->addSubRegion(str_neck, 0.4);
+            head->connectTo(neck);
 
             // Torso
             auto upperBody = torso->addSubRegion(str_upper_body, 0.5);
             auto lowerBody = torso->addSubRegion(str_lower_body, 0.5);
-            neck->connectExistingRegion(upperBody);
-            upperBody->connectExistingRegion(lowerBody);
+            neck->connectTo(upperBody);
+            upperBody->connectTo(lowerBody);
 
             break;
         }
@@ -244,7 +250,7 @@ vector<BodyRegion*> BodyRegion::subdivideIntoParts(string name, float sizeFracti
     return parts;
 }
 
-BodyRegion *BodyRegion::connectExistingRegion(BodyRegion *child) {
+BodyRegion *BodyRegion::connectTo(BodyRegion *child) {
     this->attachedRegions.push_back(child);
     return child;
 }

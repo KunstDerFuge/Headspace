@@ -74,7 +74,7 @@ struct BodyRegion {
     std::string verbosePositionName;
 
     BodyRegion* addSubRegion(std::string name, float sizeFraction, std::string positionName="");
-    BodyRegion* connectExistingRegion(BodyRegion* child);
+    BodyRegion* connectTo(BodyRegion *child);
     std::vector<BodyRegion*> subdivideIntoParts(std::string name, float sizeFraction, int numberOfSubdivisions, bool useLeftRight);
     void addAbility(AbilityTag ability, float factor);
 
