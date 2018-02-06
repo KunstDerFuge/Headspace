@@ -28,8 +28,9 @@ void Body::generateParts(float size, int locomotion, int composition) {
     switch (locomotion) {
         case LOCOMOTION_BIPEDAL: {
             auto head = addBodyRegion(str_head, 1);
+            auto arms = addBodyRegion(str_arms, 2, false);
             auto torso = addBodyRegion(str_torso, 4);
-            auto legs = addBodyRegion(str_legs, 4);
+            auto legs = addBodyRegion(str_legs, 4, 0.3);
 
             // Head
             float hearingSharpness = randomSampleNormal(0.8, 0.2, 0.f, 1.f);
@@ -38,14 +39,7 @@ void Body::generateParts(float size, int locomotion, int composition) {
             head->addAbility(hearing, hearingSharpness);
             head->addAbility(smell, smellingSharpness);
             head->addAbility(bite, biteAptitude);
-            int numberOfEyes = randomFromXToY(0, 3);
-            if (numberOfEyes != 0) {
-                float visionSharpnessPerEye = randomSampleNormal(0.6, 0.2, 0.f, 1.f);
-                auto eyes = head->addSubRegion(str_eyes, 0.1);
-                auto eyesPhysical = eyes->subdivideIntoParts(str_eye, 1.f, numberOfEyes, true);
-                for (auto eye : eyesPhysical)
-                    eye->addAbility(vision, visionSharpnessPerEye);
-            }
+            head->generateEyes(0, 3, 0.1, 0.5, 0.2);
             auto neck = head->addSubRegion(str_neck, 0.2);
             setAsRoot(head);
             head->connectExistingRegion(neck);
@@ -57,8 +51,8 @@ void Body::generateParts(float size, int locomotion, int composition) {
             upperBody->connectExistingRegion(lowerBody);
 
             // Arms
-            auto arms = upperBody->subdivideIntoParts(str_arm, 0.4, 2, true);
-            for (auto arm : arms) {
+            auto armsPhysical = arms->subdivideIntoParts(str_arm, 1.f, 2, true);
+            for (auto arm : armsPhysical) {
                 auto upperArm = arm->addSubRegion(str_upper_arm, 0.45);
                 auto lowerArm = arm->addSubRegion(str_lower_arm, 0.45);
                 auto hand = arm->addSubRegion(str_hand, 0.1);
@@ -78,7 +72,6 @@ void Body::generateParts(float size, int locomotion, int composition) {
 
             // Legs
             auto legsLimbs = legs->subdivideIntoParts(str_leg, 1.f, 2, true);
-            legs->emptySpaceFactor = 0.3;
 
             for (auto leg : legsLimbs) {
                 auto upperLeg = leg->addSubRegion(str_upper_leg, 0.48);
@@ -97,7 +90,7 @@ void Body::generateParts(float size, int locomotion, int composition) {
         case LOCOMOTION_QUADRUPEDAL: {
             auto head = addBodyRegion(str_head, 1);
             auto torso = addBodyRegion(str_torso, 3);
-            auto legs = addBodyRegion(str_legs, 2);
+            auto legs = addBodyRegion(str_legs, 2, 0.7);
 
             // Head
             auto eyes = head->addSubRegion(str_eyes, 0.1);
@@ -172,8 +165,8 @@ void Body::generateParts(float size, int locomotion, int composition) {
  * this region. If the 'head' region has weight 1, and an 'upperBody' region has weight 4, the upper body's target area
  * is equivalent to four heads. The creature's total size will then be distributed amongst its regions accordingly.
  */
-BodyRegion* Body::addBodyRegion(std::string name, float sizeWeight) {
-    auto bodyRegion = new BodyRegion(name, sizeWeight);
+BodyRegion* Body::addBodyRegion(std::string name, float sizeWeight, float emptySpaceFactor, bool targetable) {
+    auto bodyRegion = new BodyRegion(name, sizeWeight, emptySpaceFactor, targetable);
     bodyRegions.push_back(bodyRegion);
     return bodyRegion;
 }
@@ -199,7 +192,7 @@ vector<BodyRegion*> Body::printWalkthrough(BodyRegion* region) {
             return region->subRegions;
         }
         for (auto part : region->subRegions) {
-            cout << count << ": " << part->name << "(" << part->positionName << ")" << "[" << part->verbosePositionName << "]" << endl;
+            cout << count << ": " << part->getName() << " (" << part->getNameVerbose() << ")" << endl;
             count++;
         }
         return region->subRegions;
@@ -211,9 +204,11 @@ vector<BodyRegion*> Body::printWalkthrough(BodyRegion* region) {
     return bodyRegions;
 }
 
-BodyRegion::BodyRegion(std::string name, float sizeWeight) {
+BodyRegion::BodyRegion(std::string name, float sizeWeight, float emptySpaceFactor, bool targetable) {
     this->name = name;
     this->size = size;
+    this->emptySpaceFactor = emptySpaceFactor;
+    this->targetable = targetable;
 }
 
 /*
@@ -225,20 +220,10 @@ BodyRegion *BodyRegion::addSubRegion(std::string name, float sizeFraction, std::
     auto child = new BodyRegion(name, sizeFraction);
     child->positionName = positionName;
     child->verbosePositionName = concatenateWordToCopy(this->verbosePositionName, positionName);
-    child->name = concatenateWordToCopy(child->positionName, child->name);
+    child->name = name;
     toSentenceCase(child->name);
     this->subRegions.push_back(child);
     return child;
-}
-
-/*
- * Add an attached region to this body region. Attached regions do not overlap at all, and their size is a fraction of
- * its parent's area.
- */
-BodyRegion *BodyRegion::addAttachedRegion(std::string name, float sizeFraction) {
-    auto attachment = new BodyRegion(name, sizeFraction);
-    this->attachedRegions.push_back(attachment);
-    return attachment;
 }
 
 /*
@@ -266,6 +251,35 @@ BodyRegion *BodyRegion::connectExistingRegion(BodyRegion *child) {
 
 void BodyRegion::addAbility(AbilityTag ability, float factor) {
     abilityTags.insert( {ability, factor} );
+}
+
+std::string BodyRegion::getName(bool noPosition) {
+    if (noPosition)
+        return name;
+
+    string out = concatenateWordToCopy(positionName, name);
+    toSentenceCase(out);
+    return out;
+}
+
+std::string BodyRegion::getNameVerbose() {
+    string out = concatenateWordToCopy(verbosePositionName, name);
+    toSentenceCase(out);
+    return out;
+}
+
+BodyRegion* BodyRegion::generateEyes(int minNumber, int maxNumber, float sizeFraction, float sharpnessMean, float sharpnessDev) {
+    int numberOfEyes = randomFromXToY(minNumber, maxNumber);
+    if (numberOfEyes != 0) {
+        float visionSharpnessPerEye = randomSampleNormal(sharpnessMean, sharpnessDev, 0.f, 1.f);
+        auto eyes = this->addSubRegion(str_eyes, sizeFraction);
+        auto eyesPhysical = eyes->subdivideIntoParts(str_eye, 1.f, numberOfEyes, true);
+        for (auto eye : eyesPhysical)
+            eye->addAbility(vision, visionSharpnessPerEye);
+
+        return eyes;
+    }
+    return nullptr;
 }
 
 void BodyPart::addChild(BodyRegion* child) {

@@ -10,6 +10,7 @@ static const char* str_head = "Head";
 static const char* str_upper_body = "Upper body";
 static const char* str_lower_body = "Lower body";
 static const char* str_legs = "Legs";
+static const char* str_arms = "Arms";
 static const char* str_torso = "Torso";
 static const char* str_cephalothorax = "Cephalothorax";
 static const char* str_abdomen = "Abdomen";

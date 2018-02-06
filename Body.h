@@ -61,22 +61,28 @@ struct BodyRegion {
  * physical parts. When targeting a large, abstract region, a successful blow will travel recursively down random body
  * regions until landing on one or more actual body parts.
  */
-    BodyRegion(std::string name, float size);
+    BodyRegion(std::string name, float size, float emptySpaceFactor=0, bool targetable=true);
     std::vector<BodyPart*> parts;
     std::vector<BodyRegion*> subRegions;
     std::vector<BodyRegion*> attachedRegions;
     std::set<std::pair<AbilityTag, float>> abilityTags;
     float emptySpaceFactor;
     float size;
+    bool targetable;
     std::string name;
     std::string positionName;
     std::string verbosePositionName;
 
     BodyRegion* addSubRegion(std::string name, float sizeFraction, std::string positionName="");
-    BodyRegion* addAttachedRegion(std::string name, float sizeFraction);
     BodyRegion* connectExistingRegion(BodyRegion* child);
     std::vector<BodyRegion*> subdivideIntoParts(std::string name, float sizeFraction, int numberOfSubdivisions, bool useLeftRight);
     void addAbility(AbilityTag ability, float factor);
+
+    // Specialty functions for generating body parts
+    BodyRegion* generateEyes(int minNumber, int maxNumber, float sizeFraction, float sharpnessMean, float sharpnessDev);
+
+    std::string getName(bool noPosition = false);
+    std::string getNameVerbose();
 };
 
 struct Body {
@@ -89,7 +95,7 @@ struct Body {
 
     void generateParts(float size, int locomotion, int composition);
     std::vector<BodyRegion*> printWalkthrough(BodyRegion* region=nullptr);
-    BodyRegion* addBodyRegion(std::string name, float sizeWeight);
+    BodyRegion* addBodyRegion(std::string name, float sizeWeight, float emptySpaceFactor=0, bool targetable=true);
     void setAsRoot(BodyRegion* root);
     void addBodyPart(BodyPart* part);
     void calculateWeight();
