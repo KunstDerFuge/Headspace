@@ -10,7 +10,7 @@ using namespace std;
 
 int main() {
 
-    auto creature = new Creature;
+    auto creature = new Creature(Point(0, 0));
     for (int i = 0; i < 100; i++)
         creature->generateRandom(randomChoiceOfN(5));
 

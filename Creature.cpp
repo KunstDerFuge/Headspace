@@ -60,7 +60,7 @@ Creature *Creature::generateRandom(int sizeClass) {
             throw;
     }
 
-    auto* creature = new Creature();
+    auto* creature = new Creature(Point(0, 0));
     list<BodyPart*> parts;
     list<BodyRegion*> regions;
 
@@ -121,6 +121,9 @@ Creature *Creature::generateRandom(int sizeClass) {
 
 void Creature::setBody(Body* body) {
     this->body = body;
+}
+
+Creature::Creature(Point location) : location(location) {
 }
 
 Point::Point(int x, int y) {

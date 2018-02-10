@@ -11,7 +11,7 @@ using namespace std;
 
 static std::default_random_engine ENGINE;
 
-int randomChoiceOfN(int n) {
+long randomChoiceOfN(int n) {
     uniform_int_distribution<int> distribution(0, n-1);
     return distribution(ENGINE);
 }
@@ -142,7 +142,7 @@ std::string namePosition(int position, int numberOfPositions, bool useLeftRight)
     return toOrdinal(position);
 }
 
-int randomFromXToY(int x, int y) {
+long randomFromXToY(int x, int y) {
     return randomChoiceOfN(y-x + 1) + x;
 }
 

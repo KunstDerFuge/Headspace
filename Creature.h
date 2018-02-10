@@ -38,7 +38,7 @@ static const int SIZE_COLOSSAL = 4;
 
 enum AbilityTag { vision, hearing, presence_vibration_detect, smell, telepathy,   // senses
                     movement, flight, grasp, tentacle_grasp,
-                    bite, scratch, bash };
+                    bite, scratch, bash, secrete_acid, bloodsucking, telekinesis };
 
 struct Point {
     int x;
@@ -53,6 +53,7 @@ class Body;
 
 class Creature {
 private:
+
     Body* body;
     Point location;
 
@@ -61,6 +62,7 @@ public:
     float getSize();
     Creature* generateRandom(int sizeClass);
     void setBody(Body* body);
+    Creature(Point location);
 };
 
 
