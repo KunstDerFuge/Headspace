@@ -80,19 +80,19 @@ std::string toOrdinal(int in) {
         return ordinals[in];
 
     if (in < 29)
-        return "twenty-" + ordinals[in % 20];
+        return "twenty-" + ordinals[in - 20];
 
     if (in == 29)
         return "thirtieth";
 
     if (in < 39)
-        return "thirty-" + ordinals[in % 30];
+        return "thirty-" + ordinals[in - 30];
 
     if (in == 39)
         return "fortieth";
 
     if (in < 49)
-        return "forty-" + ordinals[in % 40];
+        return "forty-" + ordinals[in - 40];
 
     if (in == 49)
         return "fiftieth";
