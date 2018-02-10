@@ -56,8 +56,11 @@ int randomChoiceFromWeights(std::initializer_list<int> list) {
     throw;
 }
 
-bool randomBool() {
-    return randomChoiceOfN(2) == 1;
+bool randomBool(float chance) {
+    if (chance == 0.5)
+        return randomChoiceOfN(2) == 1;
+
+    return randomFloatZeroToN(1.f) > chance;
 }
 
 void toLowercase(std::string& in) {

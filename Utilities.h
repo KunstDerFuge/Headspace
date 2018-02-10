@@ -14,7 +14,7 @@ float randomFloatZeroToN(float n);
 float randomSampleNormal(float, float);
 float randomSampleNormal(float mean, float dev, float min, float max);
 int randomChoiceFromWeights(std::initializer_list<int>);
-bool randomBool();
+bool randomBool(float chance=0.5);
 
 template<typename t>
 t randomChoiceFromVector(std::vector<t> vector);

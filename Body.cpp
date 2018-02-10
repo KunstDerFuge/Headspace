@@ -32,6 +32,7 @@ void Body::generateParts(float size, int locomotion, int composition) {
             auto arms = addBodyRegion(str_arms, 2, false);
             auto torso = addBodyRegion(str_torso, 4);
             auto legs = addBodyRegion(str_legs, 4, 0.3);
+            setAsRoot(head);
 
             // Head
             float hearingSharpness = randomSampleNormal(0.8, 0.2, 0.f, 1.f);
@@ -42,7 +43,6 @@ void Body::generateParts(float size, int locomotion, int composition) {
             head->addAbility(bite, biteAptitude);
             head->generateEyes(0, 3, 0.1, 0.5, 0.2);
             auto neck = head->addSubRegion(str_neck, 0.2);
-            setAsRoot(head);
             head->connectTo(neck);
 
             // Torso
@@ -92,6 +92,7 @@ void Body::generateParts(float size, int locomotion, int composition) {
             auto head = addBodyRegion(str_head, 1);
             auto torso = addBodyRegion(str_torso, 3);
             auto legs = addBodyRegion(str_legs, 2, 0.7);
+            setAsRoot(head);
 
             // Head
             float hearingSharpness = randomSampleNormal(0.8, 0.2, 0.f, 1.f);
@@ -101,7 +102,6 @@ void Body::generateParts(float size, int locomotion, int composition) {
             head->addAbility(smell, smellingSharpness);
             head->addAbility(bite, biteAptitude);
             head->generateEyes(0, 4, 0.1, 0.4, 0.2);
-            setAsRoot(head);
             auto neck = head->addSubRegion(str_neck, 0.4);
             head->connectTo(neck);
 
@@ -146,6 +146,7 @@ void Body::generateParts(float size, int locomotion, int composition) {
         case LOCOMOTION_OCTOPEDAL: {
             auto cephalothorax = addBodyRegion(str_cephalothorax, 1);
             auto legs = addBodyRegion(str_legs, 1);
+            setAsRoot(cephalothorax);
 
             // Cephalothorax
             cephalothorax->generateEyes(0, 12, 0.2, 0.6, 0.2);
@@ -157,6 +158,16 @@ void Body::generateParts(float size, int locomotion, int composition) {
             cephalothorax->addAbility(bite, biteAptitude);
 
             // Legs
+            int numberOfLegs = randomFromXToY(3, 5) * 2; // 6 - 10, only even numbers
+            auto legsPhysical = legs->subdivideIntoParts(str_leg, 1.f, numberOfLegs, false);
+            for (auto leg : legsPhysical) {
+                auto upperLeg = leg->addSubRegion(str_upper_leg, 0.5);
+                auto lowerLeg = leg->addSubRegion(str_lower_leg, 0.5);
+                cephalothorax->connectTo(upperLeg);
+                upperLeg->connectTo(lowerLeg);
+                lowerLeg->addAbility(movement, 0.15);
+                lowerLeg->addAbility(presence_vibration_detect, 0.1);
+            }
 
             break;
         }
@@ -164,11 +175,28 @@ void Body::generateParts(float size, int locomotion, int composition) {
         case LOCOMOTION_SLITHERING: {
             auto head = addBodyRegion(str_head, 1);
             auto body = addBodyRegion(str_body, 4);
+
+            // Head
+            head->generateEyes(0, 4, 0.1, 0.25, 0.15);
+            float hearingSharpness = randomSampleNormal(0.25, 0.1, 0.f, 1.f);
+            float smellingSharpness = randomSampleNormal(0.6, 0.2, 0.f, 1.f);
+            float biteAptitude = randomSampleNormal(0.7, 0.1, 0.f, 1.f);
+            head->addAbility(hearing, hearingSharpness);
+            head->addAbility(smell, smellingSharpness);
+            head->addAbility(bite, biteAptitude);
+
+            // Body
+            float movementAbility = randomSampleNormal(0.8, 0.15, 0.f, 1.f);
+            float presenceDetectAbility = randomSampleNormal(0.6, 0.2, 0.f, 1.f);
+            body->addAbility(movement, movementAbility);
+            body->addAbility(presence_vibration_detect, presenceDetectAbility);
+
             break;
         }
 
         case LOCOMOTION_GASTROPEDAL: {
-            if (randomBool()) { // 50% chance gastropod has a shell
+            bool snailLike = randomBool(); // 50% chance gastropod has a shell
+            if (snailLike) {
                 // Snail-like
                 auto shell = addBodyRegion(str_shell, 3);
             } else {
@@ -182,6 +210,22 @@ void Body::generateParts(float size, int locomotion, int composition) {
         case LOCOMOTION_TENTACLE_CRAWLING: {
             auto head = addBodyRegion(str_head, 1);
             auto tentacles = addBodyRegion(str_tentacles, 1);
+
+            // Head
+            float hearingSharpness = randomSampleNormal(0.25, 0.1, 0.f, 1.f);
+            float smellingSharpness = randomSampleNormal(0.2, 0.1, 0.f, 1.f);
+            float tentacleGraspAbility = randomSampleNormal(0.8, 0.2, 0.0, 1.f);
+            head->addAbility(hearing, hearingSharpness);
+            head->addAbility(smell, smellingSharpness);
+
+            // Tentacles
+            int numberOfTentacles = randomFromXToY(3, 12);
+            auto tentaclesLimbs = tentacles->subdivideIntoParts(str_tentacle, 1.f, numberOfTentacles, false);
+            for (auto tentacle : tentaclesLimbs) {
+                head->connectTo(tentacle);
+                tentacle->addAbility(tentacle_grasp, tentacleGraspAbility);
+            }
+
             break;
         }
 
@@ -196,6 +240,7 @@ void Body::generateParts(float size, int locomotion, int composition) {
             } else {
                 // Batlike
                 auto head = addBodyRegion(str_head, 1);
+                auto wings = addBodyRegion(str_wings, 3, 0, false);
                 auto body = addBodyRegion(str_body, 2);
             }
             break;
