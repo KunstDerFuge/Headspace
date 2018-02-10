@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <vector>
+#include <tgmath.h>
 
 #include "Creature.h"
 #include "Body.h"
@@ -120,4 +121,19 @@ Creature *Creature::generateRandom(int sizeClass) {
 
 void Creature::setBody(Body* body) {
     this->body = body;
+}
+
+Point::Point(int x, int y) {
+    this->x = x;
+    this->y = y;
+}
+
+float Point::squaredDistanceTo(Point& b) {
+    float dx = b.x - this->x;
+    float dy = b.y - this->y;
+    return (dx * dx) + (dy * dy);
+}
+
+float Point::distanceTo(Point& b) {
+    return sqrt(squaredDistanceTo(b));
 }

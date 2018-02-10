@@ -40,11 +40,21 @@ enum AbilityTag { vision, hearing, presence_vibration_detect, smell, telepathy, 
                     movement, flight, grasp, tentacle_grasp,
                     bite, scratch, bash };
 
+struct Point {
+    int x;
+    int y;
+
+    Point(int x, int y);
+    float distanceTo(Point& b);
+    float squaredDistanceTo(Point& b);
+};
+
 class Body;
 
 class Creature {
 private:
     Body* body;
+    Point location;
 
 public:
     float getWeight();
