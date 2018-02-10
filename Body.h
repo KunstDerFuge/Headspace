@@ -73,15 +73,15 @@ struct BodyRegion {
     std::string positionName;
     std::string verbosePositionName;
 
-    BodyRegion* addSubRegion(std::string name, float sizeFraction, std::string positionName="");
+    BodyRegion* addSubRegion(std::string name, float sizeFraction, std::string positionName="", bool usePossessive=false);
     BodyRegion* connectTo(BodyRegion *child);
-    std::vector<BodyRegion*> subdivideIntoParts(std::string name, float sizeFraction, int numberOfSubdivisions, bool useLeftRight);
+    std::vector<BodyRegion*> subdivideIntoParts(std::string name, float sizeFraction, int numberOfSubdivisions, bool useLeftRight, bool usePossessive=false);
     void addAbility(AbilityTag ability, float factor);
 
     // Specialty functions for generating body parts
     BodyRegion* generateEyes(int minNumber, int maxNumber, float sizeFraction, float sharpnessMean, float sharpnessDev);
 
-    std::string getName(bool noPosition = false);
+    std::string getName(bool noPosition=false);
     std::string getNameVerbose();
 };
 

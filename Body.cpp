@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <tgmath.h>
 
 #include "Body.h"
 #include "Creature.h"
@@ -57,7 +58,7 @@ void Body::generateParts(float size, int locomotion, int composition) {
                 auto lowerArm = arm->addSubRegion(str_lower_arm, 0.45);
                 auto hand = arm->addSubRegion(str_hand, 0.1);
                 auto palm = hand->addSubRegion(str_palm, 0.5);
-                auto fingers = hand->addSubRegion(str_fingers, 0.5);
+                auto fingers = hand->addSubRegion(str_fingers, 0.5, "", true);
                 int numFingers = randomFromXToY(2, 6);
                 auto fingersLimbs = fingers->subdivideIntoParts(str_finger, 1.f, numFingers, false);
                 upperBody->connectTo(upperArm)
@@ -110,12 +111,53 @@ void Body::generateParts(float size, int locomotion, int composition) {
             neck->connectTo(upperBody);
             upperBody->connectTo(lowerBody);
 
+            // Legs
+            auto forelegs = legs->addSubRegion(str_forelegs, 0.4);
+            auto hindLegs = legs->addSubRegion(str_hind_legs, 0.6);
+            auto forelegsLimbs = forelegs->subdivideIntoParts(str_foreleg, 1.f, 2, true);
+            auto hindLegsLimbs = hindLegs->subdivideIntoParts(str_hind_leg, 1.f, 2, true);
+            int numberOfClaws = randomFromXToY(2, 6);
+
+            for (auto foreleg : forelegsLimbs) {
+                auto leg = foreleg->addSubRegion(str_leg, 0.8);
+                auto forepaw = foreleg->addSubRegion(str_forepaw, 0.2);
+                auto claws = forepaw->subdivideIntoParts(str_claw, 0.2, numberOfClaws, false, true);
+                lowerBody->connectTo(leg)
+                        ->connectTo(forepaw);
+                forepaw->addAbility(scratch, 0.6);
+                for (auto claw : claws) {
+                    forepaw->connectTo(claw);
+                }
+            }
+            for (auto hindLeg : hindLegsLimbs) {
+                auto leg = hindLeg->addSubRegion(str_leg, 0.8);
+                auto hindPaw = hindLeg->addSubRegion(str_hind_paw, 0.2);
+                auto claws = hindPaw->subdivideIntoParts(str_claw, 0.2, numberOfClaws, false, true);
+                lowerBody->connectTo(leg)
+                        ->connectTo(hindPaw);
+                for (auto claw : claws) {
+                    hindPaw->connectTo(claw);
+                }
+            }
+
             break;
         }
 
         case LOCOMOTION_OCTOPEDAL: {
             auto cephalothorax = addBodyRegion(str_cephalothorax, 1);
             auto legs = addBodyRegion(str_legs, 1);
+
+            // Cephalothorax
+            cephalothorax->generateEyes(0, 12, 0.2, 0.6, 0.2);
+            float hearingSharpness = randomSampleNormal(0.2, 0.2, 0.f, 1.f);
+            float smellingSharpness = randomSampleNormal(0.2, 0.2, 0.f, 1.f);
+            float biteAptitude = randomSampleNormal(0.6, 0.1, 0.f, 1.f);
+            cephalothorax->addAbility(hearing, hearingSharpness);
+            cephalothorax->addAbility(smell, smellingSharpness);
+            cephalothorax->addAbility(bite, biteAptitude);
+
+            // Legs
+
             break;
         }
 
@@ -222,10 +264,14 @@ BodyRegion::BodyRegion(std::string name, float sizeWeight, float emptySpaceFacto
  * represents a fraction of the area of its parent. For example, a BodyRegion 'head' may have a single subregion
  * 'eyes' with weight 0.1, meaning the eyes are 10% the target area of the head, the other 90% being just head.
  */
-BodyRegion *BodyRegion::addSubRegion(std::string name, float sizeFraction, std::string positionName) {
+BodyRegion *BodyRegion::addSubRegion(std::string name, float sizeFraction, std::string positionName, bool usePossessive) {
     auto child = new BodyRegion(name, sizeFraction);
     child->positionName = positionName;
-    child->verbosePositionName = concatenateWordToCopy(this->verbosePositionName, positionName);
+    if (usePossessive) {
+        child->verbosePositionName = concatenateWordToCopy( toPossessive(this->getNameVerbose()), positionName );
+    } else {
+        child->verbosePositionName = concatenateWordToCopy(this->verbosePositionName, positionName);
+    }
     child->name = name;
     toSentenceCase(child->name);
     this->subRegions.push_back(child);
@@ -238,13 +284,13 @@ BodyRegion *BodyRegion::addSubRegion(std::string name, float sizeFraction, std::
  * limb subdividing the same region. UseLeftRight determines whether the subregions will be differentiated by
  * named positions left-center-right or first-second-third for groups of three or fewer.
  */
-vector<BodyRegion*> BodyRegion::subdivideIntoParts(string name, float sizeFraction, int numberOfSubdivisions, bool useLeftRight) {
+vector<BodyRegion*> BodyRegion::subdivideIntoParts(string name, float sizeFraction, int numberOfSubdivisions, bool useLeftRight, bool usePossessive) {
     float areaPerSubdivision = sizeFraction / numberOfSubdivisions;
     vector<BodyRegion*> parts;
     for (int i = 0; i < numberOfSubdivisions; i++) {
         string partName = name;
         string childPositionName = namePosition(i, numberOfSubdivisions, useLeftRight);
-        auto newPart = this->addSubRegion(partName, areaPerSubdivision, childPositionName);
+        auto newPart = this->addSubRegion(partName, areaPerSubdivision, childPositionName, usePossessive);
         parts.push_back(newPart);
     }
     return parts;
@@ -277,7 +323,8 @@ std::string BodyRegion::getNameVerbose() {
 BodyRegion* BodyRegion::generateEyes(int minNumber, int maxNumber, float sizeFraction, float sharpnessMean, float sharpnessDev) {
     int numberOfEyes = randomFromXToY(minNumber, maxNumber);
     if (numberOfEyes != 0) {
-        float visionSharpnessPerEye = randomSampleNormal(sharpnessMean, sharpnessDev, 0.f, 1.f);
+        // Vision acuity goes up as the square root of the number of eyes
+        float visionSharpnessPerEye = float( sqrt(numberOfEyes) * randomSampleNormal(sharpnessMean, sharpnessDev, 0.f, 1.f) / numberOfEyes );
         auto eyes = this->addSubRegion(str_eyes, sizeFraction);
         auto eyesPhysical = eyes->subdivideIntoParts(str_eye, 1.f, numberOfEyes, true);
         for (auto eye : eyesPhysical)

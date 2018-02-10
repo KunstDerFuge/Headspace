@@ -142,3 +142,11 @@ std::string namePosition(int position, int numberOfPositions, bool useLeftRight)
 int randomFromXToY(int x, int y) {
     return randomChoiceOfN(y-x + 1) + x;
 }
+
+std::string toPossessive(std::string in) {
+    char lastChar = in[ in.size()-1 ];
+    if (lastChar == 's')
+        return in + "\'";
+
+    return in + "'s";
+}

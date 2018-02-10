@@ -37,5 +37,13 @@ static const char* str_hand = "Hand";
 static const char* str_palm = "Palm";
 static const char* str_fingers = "Fingers";
 static const char* str_finger = "Finger";
+static const char* str_forelegs = "Forelegs";
+static const char* str_foreleg = "Foreleg";
+static const char* str_hind_legs = "Hind legs";
+static const char* str_hind_leg = "Hind leg";
+static const char* str_paw = "Paw";
+static const char* str_hind_paw = "Hind paw";
+static const char* str_forepaw = "Forepaw";
+static const char* str_claw = "Claw";
 
 #endif //HEADSPACE_STRINGS_H

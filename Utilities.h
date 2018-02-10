@@ -21,6 +21,7 @@ t randomChoiceFromVector(std::vector<t> vector);
 
 void toSentenceCase(std::string& in);
 void toLowercase(std::string& in);
+std::string toPossessive(std::string in);
 std::string toOrdinal(int in);
 void concatenateWord(std::string& sentence, std::string word);
 std::string concatenateWordToCopy(std::string sentence, std::string word);
