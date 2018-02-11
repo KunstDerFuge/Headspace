@@ -27,5 +27,4 @@ void concatenateWord(std::string& sentence, std::string word);
 std::string concatenateWordToCopy(std::string sentence, std::string word);
 std::string namePosition(int position, int numberOfPositions, bool useLeftRight);
 
-
 #endif //HEADSPACE_UTILITIES_H

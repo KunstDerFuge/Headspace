@@ -14,9 +14,6 @@ int main() {
     for (int i = 0; i < 100; i++)
         creature->generateRandom(randomChoiceOfN(5));
 
-//    for (int i = 0; i < 50; i++)
-//        cout << toOrdinal(i) << endl;
-
     auto body = new Body(10);
     for (int i = 0; i < 1; i++) {
         body->generateParts(100, LOCOMOTION_BIPEDAL, COMPOSITION_FLESH);
