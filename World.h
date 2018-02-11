@@ -5,8 +5,8 @@
 #ifndef HEADSPACE_WORLD_H
 #define HEADSPACE_WORLD_H
 
-
 #include <vector>
+
 class Creature;
 class Player;
 
@@ -16,6 +16,5 @@ private:
     Player* player;
 public:
 };
-
 
 #endif //HEADSPACE_WORLD_H
