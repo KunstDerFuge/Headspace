@@ -1,12 +1,10 @@
-// This shader sourced directly from https://github.com/trillek-team/trillek-vcomputer-module
-
 // Basic Fragment Shader that generates a Scanline/TV effect
 // Based on :
 //   https://github.com/tacoe/detroit/blob/master/arthur/scanlines.glsl
 //   http://pastebin.com/sTk3EUAp
 //   https://gitorious.org/bsnes/bsnes/source/4246a6b0eb664d00ed3cac186d113cca4701911e:shaders/GLSL/Curvature.shader#L20
 //   http://pastebin.com/TcPdyik0
-#version 140
+#version 130
 
 precision highp float; // needed only for version 1.30
 
@@ -37,10 +35,10 @@ const float noise = 0.075;
 const float distortion = 0.08;
 
 // Flicker intesity
-//const float flicker = 0.025;
+const float flicker = 0.025;
 
 // Time depedent FX
-uniform float time = 0.0;
+uniform float time = 4.0;
 
 // Screen texture
 uniform sampler2D texture0;

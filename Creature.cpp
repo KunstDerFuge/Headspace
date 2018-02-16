@@ -126,17 +126,3 @@ void Creature::setBody(Body* body) {
 Creature::Creature(Point location) : location(location) {
 }
 
-Point::Point(int x, int y) {
-    this->x = x;
-    this->y = y;
-}
-
-float Point::squaredDistanceTo(Point& b) {
-    float dx = b.x - this->x;
-    float dy = b.y - this->y;
-    return (dx * dx) + (dy * dy);
-}
-
-float Point::distanceTo(Point& b) {
-    return sqrt(squaredDistanceTo(b));
-}

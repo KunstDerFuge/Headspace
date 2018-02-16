@@ -5,6 +5,8 @@
 #ifndef HEADSPACE_CREATURE_H
 #define HEADSPACE_CREATURE_H
 
+#include "WorldMap.h"
+
 static const int COMPOSITION_FLESH = 0;
 static const int COMPOSITION_GELATINOUS = 1;
 static const int COMPOSITION_MUCOUSY_COLLAGEN = 2;  // Think octopus
@@ -39,15 +41,6 @@ static const int SIZE_COLOSSAL = 4;
 enum AbilityTag { vision, hearing, presence_vibration_detect, smell, telepathy,   // senses
                     movement, flight, grasp, tentacle_grasp,
                     bite, scratch, bash, secrete_acid, bloodsucking, telekinesis };
-
-struct Point {
-    int x;
-    int y;
-
-    Point(int x, int y);
-    float distanceTo(Point& b);
-    float squaredDistanceTo(Point& b);
-};
 
 class Body;
 

@@ -8,6 +8,8 @@
 #include <vector>
 #include <string>
 
+struct Point;
+
 int randomChoiceOfN(int n);
 int randomFromXToY(int x, int y);
 float randomFloatZeroToN(float n);
