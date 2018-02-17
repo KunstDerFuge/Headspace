@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <map>
+#define CHUNK_WIDTH 128
 
 enum terrainType {
     dirt, sand, boulder, gravel, water, ice
@@ -18,6 +19,7 @@ struct Point {
     int y;
 
     Point(int x, int y);
+    std::pair<int, int> toPair();
     float distanceTo(Point& b);
     float squaredDistanceTo(Point& b);
 };
@@ -28,17 +30,22 @@ struct Tile {
 
 class Chunk {
 private:
-    std::map<int, std::map<int, Tile>> tiles;
+    Tile tiles[CHUNK_WIDTH][CHUNK_WIDTH];
 public:
     Tile getTile(int x, int y);
 };
 
 class WorldMap {
 private:
-    std::map<int, std::map<int, Chunk>> chunks;
+    std::map<int, std::map<int, Chunk*>> chunks;
 public:
     Tile getTile(Point coord);
-    Point toChunkCoord(Point coord);
+    std::pair<int, int> getChunkCoord(Point coord);
+    Chunk* getChunk(int x, int y);
+    void generateChunk(int x, int y);
+    bool chunkExists(int x, int y);
+    WorldMap(int width);
+    ~WorldMap();
 };
 
 

@@ -1,11 +1,7 @@
 #include <iostream>
-#include <vector>
 #include <random>
 #include <SFML/Graphics.hpp>
-#include "Player.h"
-#include "Utilities.h"
-#include "Creature.h"
-#include "Body.h"
+#include "WorldMap.h"
 
 using namespace std;
 
@@ -38,6 +34,8 @@ int main() {
     screen.display();
     sf::Sprite sprite(screen.getTexture());
     shader.setUniform("Texture", sf::Texture(*sprite.getTexture()));
+
+    WorldMap worldMap(30000);
 
     while (window.isOpen()) {
         sf::Event event;
