@@ -6,6 +6,7 @@
 #define HEADSPACE_WORLD_H
 
 #include <vector>
+#include <SFML/Graphics/RenderWindow.hpp>
 
 class Creature;
 class Player;
@@ -19,6 +20,8 @@ private:
     Player* player;
     WorldMap* worldMap;
 public:
+    explicit World(int width);
+    void renderMap(sf::RenderWindow& window);
 };
 
 #endif //HEADSPACE_WORLD_H

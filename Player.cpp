@@ -23,3 +23,14 @@
 //    health = 100;
 //    inventory = new Inventory();
 //}
+
+Player::Player(Point location) : location(location) {
+}
+
+sf::Vector2f Player::getPlayerCenter() {
+    return {location.x, location.y};
+}
+
+Point Player::getPlayerLocation() {
+    return location;
+}

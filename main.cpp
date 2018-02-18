@@ -2,40 +2,16 @@
 #include <random>
 #include <SFML/Graphics.hpp>
 #include "WorldMap.h"
+#include "World.h"
 
 using namespace std;
 
 int main() {
 
+    World* world = new World(30);
+
     sf::RenderWindow window(sf::VideoMode(1024, 768), "Headspace");
-    sf::Texture texture;
-    if (!texture.loadFromFile("../assets/graphics/sample.png"))
-        cout << "Could not load texture" << endl;
-
-    sf::CircleShape circleShape(300);
-
-    sf::Shader shader;
-    circleShape.setFillColor(sf::Color::Green);
-    //circleShape.setTexture(&texture);
-    circleShape.setTexture(&texture);
-
-    if (!shader.loadFromFile("../assets/shaders/retro_texture.frag", sf::Shader::Fragment)) {
-        cerr << "Could not load shader" << endl;
-    }
-
-    sf::RenderTexture screen;
-    if (!screen.create(1000, 1000)) {
-        cerr << "Could not create render texture" << endl;
-        return 1;
-    }
-
-    screen.clear();
-    screen.draw(circleShape, &shader);
-    screen.display();
-    sf::Sprite sprite(screen.getTexture());
-    shader.setUniform("Texture", sf::Texture(*sprite.getTexture()));
-
-    WorldMap worldMap(30);
+    window.setFramerateLimit(60);
 
     while (window.isOpen()) {
         sf::Event event;
@@ -43,8 +19,12 @@ int main() {
             if (event.type == sf::Event::Closed)
                 window.close();
         }
+
+        // RENDER THE MAP
         window.clear(sf::Color(0, 100, 100));
-        window.draw(sprite);
+        world->renderMap(window);
+
+        // Display
         window.display();
     }
 

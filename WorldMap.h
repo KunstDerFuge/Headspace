@@ -8,7 +8,11 @@
 
 #include <vector>
 #include <map>
+#include <SFML/Graphics/RenderWindow.hpp>
+
 #define CHUNK_WIDTH 128
+
+class Player;
 
 enum terrainType {
     dirt, sand, boulder, gravel, water, ice
@@ -44,7 +48,8 @@ public:
     Chunk* getChunk(int x, int y);
     void generateChunk(int x, int y);
     bool chunkExists(int x, int y);
-    WorldMap(int width);
+    void render(sf::RenderWindow& window, Player* player);
+    explicit WorldMap(int width);
     ~WorldMap();
 };
 

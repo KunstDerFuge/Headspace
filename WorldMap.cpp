@@ -4,7 +4,9 @@
 
 #include <cmath>
 #include <iostream>
+#include <SFML/Graphics/RectangleShape.hpp>
 #include "WorldMap.h"
+#include "Player.h"
 
 using namespace std;
 
@@ -87,6 +89,25 @@ WorldMap::WorldMap(int width) {
     for (int x = 0; x < width; ++x) {
         for (int y = 0; y < width; ++y) {
             generateChunk(offset+x, offset+y);
+        }
+    }
+}
+
+void WorldMap::render(sf::RenderWindow& window, Player* player) {
+
+    Point playerLocation = player->getPlayerLocation();
+    sf::View playerView(player->getPlayerCenter(), sf::Vector2f(300, 300));
+    auto width = int(playerView.getSize().x);
+    auto height = int(playerView.getSize().y);
+    int upperLeftBoundX = playerLocation.x - (width / 2);
+    int upperLeftBoundY = playerLocation.y - (height / 2);
+    for (int x = upperLeftBoundX; x < upperLeftBoundX + width; ++x) {
+        for (int y = upperLeftBoundY; y < upperLeftBoundY + height; ++y) {
+            sf::RectangleShape tile;
+            tile.setPosition(upperLeftBoundX + x, upperLeftBoundY + y);
+            tile.setSize(sf::Vector2f(10.f, 1.f));
+            tile.setFillColor(sf::Color::Green);
+            window.draw(tile);
         }
     }
 }
