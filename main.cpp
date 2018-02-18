@@ -1,14 +1,12 @@
 #include <iostream>
-#include <random>
 #include <SFML/Graphics.hpp>
-#include "WorldMap.h"
 #include "World.h"
 
 using namespace std;
 
 int main() {
 
-    World* world = new World(30);
+    auto world = new World(3);
 
     sf::RenderWindow window(sf::VideoMode(1024, 768), "Headspace");
     window.setFramerateLimit(60);
@@ -47,6 +45,6 @@ int main() {
 //        if (selection == -1)
 //            break;
 //    }
-
+    delete world;
     return 0;
 }

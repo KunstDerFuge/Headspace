@@ -21,6 +21,7 @@ private:
     WorldMap* worldMap;
 public:
     explicit World(int width);
+    ~World();
     void renderMap(sf::RenderWindow& window);
 };
 
