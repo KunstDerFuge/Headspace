@@ -9,11 +9,15 @@
 
 class Creature;
 class Player;
+class WorldMap;
+class Item;
 
 class World {
 private:
     std::vector<Creature*> creatures;
+    std::vector<Item*> items;
     Player* player;
+    WorldMap* worldMap;
 public:
 };
 

@@ -61,6 +61,7 @@ Chunk* WorldMap::getChunk(int x, int y) {
 void WorldMap::generateChunk(int x, int y) {
     if (chunkExists(x, y))
         cerr << "Generating chunk where one already exists: (" << x << ", " << y << ")" << endl;
+    //cerr << "Generating chunk at (" << x << ", " << y << ")..." << endl;
     chunks[x][y] = new Chunk();
 }
 
@@ -82,9 +83,11 @@ WorldMap::~WorldMap() {
 }
 
 WorldMap::WorldMap(int width) {
-    for (int i = 0; i < width; i++) {
-        generateChunk(i, 0);
-        generateChunk(0, i);
+    int offset = width / 2;
+    for (int x = 0; x < width; ++x) {
+        for (int y = 0; y < width; ++y) {
+            generateChunk(offset+x, offset+y);
+        }
     }
 }
 

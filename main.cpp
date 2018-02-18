@@ -35,7 +35,7 @@ int main() {
     sf::Sprite sprite(screen.getTexture());
     shader.setUniform("Texture", sf::Texture(*sprite.getTexture()));
 
-    WorldMap worldMap(30000);
+    WorldMap worldMap(30);
 
     while (window.isOpen()) {
         sf::Event event;
