@@ -28,7 +28,7 @@ Player::Player(Point location) : location(location) {
 }
 
 sf::Vector2f Player::getPlayerCenter() {
-    return {location.x, location.y};
+    return {location.x*32+16, location.y*32+16};
 }
 
 Point Player::getPlayerLocation() {

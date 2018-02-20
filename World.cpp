@@ -7,6 +7,8 @@
 #include "WorldMap.h"
 #include "Player.h"
 
+using namespace std;
+
 World::World(int width) {
     worldMap = new WorldMap(width);
     player = new Player(Point(0, 0));
@@ -17,7 +19,7 @@ void World::renderMap(sf::RenderWindow& window) {
 }
 
 World::~World() {
-    std::cerr << "World destructor" << std::endl;
+    cerr << "World destructor" << std::endl;
     delete player;
     delete worldMap;
 }

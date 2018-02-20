@@ -8,7 +8,7 @@ int main() {
 
     auto world = new World(3);
 
-    sf::RenderWindow window(sf::VideoMode(1024, 768), "Headspace");
+    sf::RenderWindow window(sf::VideoMode(402, 176), "Headspace");
     window.setFramerateLimit(60);
 
     while (window.isOpen()) {

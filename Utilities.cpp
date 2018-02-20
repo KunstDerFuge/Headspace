@@ -153,3 +153,7 @@ std::string toPossessive(std::string in) {
 
     return in + "'s";
 }
+
+sf::Vector2f tileToRenderCoord(float x, float y) {
+    return {x*32, y*32};
+}

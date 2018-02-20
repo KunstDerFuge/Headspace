@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <string>
+#include "WorldMap.h"
 
 struct Point;
 
@@ -28,5 +29,6 @@ std::string toOrdinal(int in);
 void concatenateWord(std::string& sentence, std::string word);
 std::string concatenateWordToCopy(std::string sentence, std::string word);
 std::string namePosition(int position, int numberOfPositions, bool useLeftRight);
+sf::Vector2f tileToRenderCoord(float x, float y);
 
 #endif //HEADSPACE_UTILITIES_H

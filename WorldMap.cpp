@@ -5,8 +5,10 @@
 #include <cmath>
 #include <iostream>
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/Texture.hpp>
 #include "WorldMap.h"
 #include "Player.h"
+#include "Utilities.h"
 
 using namespace std;
 
@@ -94,19 +96,23 @@ WorldMap::WorldMap(int width) {
 }
 
 void WorldMap::render(sf::RenderWindow& window, Player* player) {
-
-    Point playerLocation = player->getPlayerLocation();
-    sf::View playerView(player->getPlayerCenter(), sf::Vector2f(300, 300));
-    auto width = int(playerView.getSize().x);
-    auto height = int(playerView.getSize().y);
-    int upperLeftBoundX = playerLocation.x - (width / 2);
-    int upperLeftBoundY = playerLocation.y - (height / 2);
-    for (int x = upperLeftBoundX; x < upperLeftBoundX + width; ++x) {
-        for (int y = upperLeftBoundY; y < upperLeftBoundY + height; ++y) {
+    auto playerLocation = player->getPlayerLocation();
+    auto windowSize = window.getSize();
+    auto viewWidthInTiles = windowSize.x / 32.f;
+    auto viewHeightInTiles = windowSize.y / 32.f;
+    sf::View playerView(player->getPlayerCenter(), tileToRenderCoord(viewWidthInTiles, viewHeightInTiles));
+    auto renderWidthInTiles = int(viewWidthInTiles + 2);
+    auto renderHeightInTiles = int(viewHeightInTiles + 2);
+    int upperLeftTileX = playerLocation.x - renderWidthInTiles / 2;
+    int upperLeftTileY = playerLocation.y - renderHeightInTiles / 2;
+    for (int x = upperLeftTileX; x < upperLeftTileX + renderWidthInTiles; ++x) {
+        for (int y = upperLeftTileY; y < upperLeftTileY + renderHeightInTiles; ++y) {
             sf::RectangleShape tile;
-            tile.setPosition(upperLeftBoundX + x, upperLeftBoundY + y);
-            tile.setSize(sf::Vector2f(10.f, 1.f));
-            tile.setFillColor(sf::Color::Green);
+            tile.setPosition(tileToRenderCoord(x, y));
+            tile.setSize(sf::Vector2f(31.f, 31.f));
+            if (x == playerLocation.x && y == playerLocation.y)
+                tile.setFillColor(sf::Color::Blue);
+            window.setView(playerView);
             window.draw(tile);
         }
     }
