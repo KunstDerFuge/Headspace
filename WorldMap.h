@@ -34,7 +34,7 @@ struct Tile {
 
 class Chunk {
 private:
-    Tile tiles[CHUNK_WIDTH][CHUNK_WIDTH];
+    Tile* tiles[CHUNK_WIDTH][CHUNK_WIDTH];
 public:
     Tile getTile(int x, int y);
 };

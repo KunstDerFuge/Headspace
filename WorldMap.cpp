@@ -109,7 +109,7 @@ void WorldMap::render(sf::RenderWindow& window, Player* player) {
         for (int y = upperLeftTileY; y < upperLeftTileY + renderHeightInTiles; ++y) {
             sf::RectangleShape tile;
             tile.setPosition(tileToRenderCoord(x, y));
-            tile.setSize(sf::Vector2f(31.f, 31.f));
+            tile.setSize(sf::Vector2f(32.f, 32.f));
             if (x == playerLocation.x && y == playerLocation.y)
                 tile.setFillColor(sf::Color::Blue);
             window.setView(playerView);
