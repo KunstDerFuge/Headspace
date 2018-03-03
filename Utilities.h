@@ -9,6 +9,7 @@
 #include <string>
 #include "WorldMap.h"
 
+
 struct Point;
 
 int randomChoiceOfN(int n);
@@ -30,5 +31,10 @@ void concatenateWord(std::string& sentence, std::string word);
 std::string concatenateWordToCopy(std::string sentence, std::string word);
 std::string namePosition(int position, int numberOfPositions, bool useLeftRight);
 sf::Vector2f tileToRenderCoord(float x, float y);
+int mod(int k, int n);
+const std::string assetsPath();
+const std::string graphicsPath();
+const std::string fontsPath();
+const std::string shadersPath();
 
 #endif //HEADSPACE_UTILITIES_H

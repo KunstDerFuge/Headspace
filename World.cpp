@@ -9,17 +9,22 @@
 
 using namespace std;
 
-World::World(int width) {
-    worldMap = new WorldMap(width);
+World::World() {
+    overworld = new WorldMap();
     player = new Player(Point(0, 0));
+    player->placeInWorldMap(overworld);
 }
 
 void World::renderMap(sf::RenderWindow& window) {
-    worldMap->render(window, player);
+    overworld->render(window, player);
 }
 
 World::~World() {
     cerr << "World destructor" << std::endl;
     delete player;
-    delete worldMap;
+    delete overworld;
+}
+
+WorldMap *World::getOverworld() {
+    return overworld;
 }

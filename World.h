@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <SFML/Graphics/RenderWindow.hpp>
+#include "Player.h"
 
 class Creature;
 class Player;
@@ -18,11 +19,15 @@ private:
     std::vector<Creature*> creatures;
     std::vector<Item*> items;
     Player* player;
-    WorldMap* worldMap;
+    WorldMap* overworld;
 public:
-    explicit World(int width);
+    World();
     ~World();
     void renderMap(sf::RenderWindow& window);
+    WorldMap* getOverworld();
+    Player* getPlayer() {
+        return player;
+    }
 };
 
 #endif //HEADSPACE_WORLD_H

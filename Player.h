@@ -13,6 +13,8 @@ class Item;
 class Player {
 private:
     Point location;
+    sf::Texture* texture;
+    WorldMap* worldMap;
 
 public:
     explicit Player(Point location);
@@ -20,6 +22,9 @@ public:
     bool addToInventory(Item* item);
     sf::Vector2f getPlayerCenter();
     Point getPlayerLocation();
+    bool move(int direction);
+    void render(sf::RenderWindow &window);
+    void placeInWorldMap(WorldMap* worldMap);
 };
 
 

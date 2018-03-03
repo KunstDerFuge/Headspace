@@ -155,5 +155,22 @@ std::string toPossessive(std::string in) {
 }
 
 sf::Vector2f tileToRenderCoord(float x, float y) {
-    return {x*32, y*32};
+    return {x*TILE_WIDTH, y*TILE_WIDTH};
+}
+
+int mod(int k, int n) {  // https://stackoverflow.com/questions/12276675/modulus-with-negative-numbers-in-c
+    return ((k %= n) < 0) ? k+n : k;
+}
+
+const std::string assetsPath() {
+    return "../assets";
+}
+const std::string graphicsPath() {
+    return assetsPath() + "/graphics";
+}
+const std::string fontsPath() {
+    return assetsPath() + "/fonts";
+}
+const std::string shadersPath() {
+    return assetsPath() + "/shaders";
 }
