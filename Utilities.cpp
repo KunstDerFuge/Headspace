@@ -27,8 +27,7 @@ float randomSampleNormal(float mean, float dev) {
 }
 
 float randomSampleNormal(float mean, float dev, float min, float max) {
-    normal_distribution<float> distribution(mean, dev);
-    float out = distribution(ENGINE);
+    float out = randomSampleNormal(mean, dev);
     if (out < min) out = min;
     if (out > max) out = max;
     return out;
@@ -41,7 +40,7 @@ t randomChoiceFromVector(std::vector<t> vector) {
 }
 
 int randomChoiceFromWeights(std::initializer_list<int> list) {
-    vector<int> vector  = list;
+    vector<int> vector = list;
     int sum = 0;
     for (auto number : vector) {
         sum += number;

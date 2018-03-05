@@ -14,7 +14,7 @@ private:
     World* world;
     Console* console;
 public:
-    void logMessage(std::string message, message_type type=info);
+    void logMessage(std::wstring message, message_type type=info);
     bool movePlayer(int dir) {
         return world->getPlayer()->move(dir);
     }

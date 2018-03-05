@@ -4,7 +4,7 @@
 
 #include "Game.h"
 
-void Game::logMessage(std::string message, message_type type) {
+void Game::logMessage(std::wstring message, message_type type) {
     console->logMessage(message, type);
 }
 

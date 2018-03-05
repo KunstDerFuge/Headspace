@@ -5,13 +5,17 @@
 #ifndef HEADSPACE_ITEM_H
 #define HEADSPACE_ITEM_H
 
+#include <string>
 
 class Item {
 private:
-    int weight;
+    float weight;
+    std::string name;
+    std::string description;
 
 public:
-    int getWeight();
+    float getWeight();
+    Item(const std::string& name, const std::string& description, float weight);
 };
 
 

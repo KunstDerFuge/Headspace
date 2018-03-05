@@ -11,7 +11,7 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
-#define CHUNK_WIDTH 128  // Width and height of a chunk in tiles
+#define CHUNK_WIDTH 64  // Width and height of a chunk in tiles
 #define TILE_WIDTH 32  // Width and height of a tile in pixels
 #define CONSOLE_WIDTH 0.2  // Width of the console as a fraction of the window width
 

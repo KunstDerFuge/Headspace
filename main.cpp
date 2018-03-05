@@ -11,7 +11,7 @@ int main() {
 
     sf::RenderWindow window(sf::VideoMode(1024, 768), "Headspace");
     window.setFramerateLimit(60);
-    window.setVerticalSyncEnabled(true);
+    window.setVerticalSyncEnabled(false);
 
     unsigned short frameCount = 0;
     sf::Clock clock;
@@ -29,23 +29,23 @@ int main() {
             cout << "Last time: " << lastTime << endl;
             cout << "FPS: " << fps << endl;
 
-//            int random = rand() % 5;
-//            switch (random) {
-//                case 0:
-//                    game->logMessage("The jaguar bites!", warning);
-//                    break;
-//                case 1:
-//                    game->logMessage("You drink some water.", positive);
-//                    break;
-//                case 2:
-//                    game->logMessage("You feel cold.");
-//                    break;
-//                case 3:
-//                    game->logMessage("You read the pamphlet, but don't learn anything interesting.");
-//                    break;
-//                case 4:
-//                    game->logMessage("Peter coughs.");
-//            }
+            int random = rand() % 5;
+            switch (random) {
+                case 0:
+                    game->logMessage(L"The jaguar bites!", warning);
+                    break;
+                case 1:
+                    game->logMessage(L"You drink some water.", positive);
+                    break;
+                case 2:
+                    game->logMessage(L"Юрий Гагарин");
+                    break;
+                case 3:
+                    game->logMessage(L"You read the pamphlet, but don't learn anything interesting. Then again, why would you? It's not like you are really that interested in pamphlets in the first place, so why even read it? You ponder this for a while, and eventually settle on the conclusion that, because you're on an isolated planet without any other means of stimulation, at some point reading a pamphlet seemed like a decent idea.");
+                    break;
+                case 4:
+                    game->logMessage(L"Peter coughs.");
+            }
         }
 
         while (window.pollEvent(event)) {
@@ -67,7 +67,7 @@ int main() {
                     moved = game->movePlayer(3);
                 }
                 if (!moved)
-                    game->logMessage("Ouch!");
+                    game->logMessage(L"Ouch!");
             }
         }
 

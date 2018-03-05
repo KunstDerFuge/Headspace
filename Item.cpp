@@ -4,6 +4,14 @@
 
 #include "Item.h"
 
-int Item::getWeight() {
+using namespace std;
+
+float Item::getWeight() {
     return weight;
+}
+
+Item::Item(const std::string& name, const std::string& description, float weight) {
+    this->name = name;
+    this->description = description;
+    this->weight = weight;
 }

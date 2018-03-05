@@ -155,7 +155,7 @@ Tile* Chunk::getTile(int x, int y) {
 Chunk::Chunk(WorldMap* worldMap) {
     for (auto& column : tiles) {
         for (auto &tile : column) {
-            if (randomBool(0.95)) {
+            if (randomBool(0.999)) {
                 tile = worldMap->getUniqueTile(0);
             }
             else {

@@ -15,7 +15,7 @@
 
 using namespace std;
 
-void Console::logMessage(std::string& message, message_type& type) {
+void Console::logMessage(std::wstring& message, message_type& type) {
     if (messages.empty()) { // Calling getLastMessage() with no messages will crash
         messages.emplace_back(message, type);
         return;
@@ -75,19 +75,19 @@ void Console::render(sf::RenderWindow& window) {
             text.setPosition(consoleTextStart, lastMessageTop - spaceBetweenMessages);
         }
         textBounds = text.getGlobalBounds();
-        if (textBounds.top < 0)
-            return; // Stop drawing messages as soon as one goes off screen
         text.setFillColor(getMessageColor(getMessageType(message)));
         window.draw(text);
+        if (textBounds.top < 0)
+            return; // Stop drawing messages as soon as one goes off screen
     }
     //window.draw(consoleText);
 }
 
-string Console::getMessageString(int i) const {
+wstring Console::getMessageString(int i) const {
     if (messages[i].count == 1) {
         return messages[i].message;
     } else {
-        stringstream message;
+        wstringstream message;
         message << messages[i].message;
         message << " (x" << messages[i].count << ")";
         return message.str();
@@ -107,14 +107,14 @@ message_type Console::getMessageType(int i) const {
 sf::Color Console::getMessageColor(message_type type) const {
     switch (type) {
         case info:
-            return sf::Color::White;
+            return getColor(white);
         case warning:
         case serious:
-            return sf::Color::Red;
+            return getColor(light_red);
         case positive:
-            return sf::Color::Green;
+            return getColor(light_cyan);
         default:
-            return sf::Color::White;
+            return getColor(gray);
     }
 }
 
@@ -129,11 +129,11 @@ float Console::getNumLines(sf::Text& text) {
 }
 
 void Console::wrapText(sf::Text &text, int rightBound) {
-    int lastSpaceIndex = -1;
+    size_t lastSpaceIndex = 0;
     float offset = 0.f;
-    string message = text.getString();
+    wstring message = text.getString();
     for (auto i = 0; i < message.length(); ++i) {
-        if (message[i] == ' ') lastSpaceIndex = i;
+        if (message[i] == ' ') lastSpaceIndex = static_cast<size_t>(i);
         if (text.findCharacterPos(i).x - offset >= rightBound) {
             if (lastSpaceIndex != -1) {
                 message[lastSpaceIndex] = '\n';
@@ -144,7 +144,11 @@ void Console::wrapText(sf::Text &text, int rightBound) {
     text.setString(message);
 }
 
-Message &Console::getLastMessage() {
+Message& Console::getLastMessage() {
     return messages[messages.size()-1];
+}
+
+sf::Color Console::getColor(vga_color color) const {
+    return sf::Color(color);
 }
 
