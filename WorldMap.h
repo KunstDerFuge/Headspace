@@ -25,11 +25,11 @@ enum terrainType {
 const int NUM_TERRAIN_TYPES = 6;
 
 struct Point {
-    int x;
-    int y;
+    long x;
+    long y;
 
-    Point(int x, int y);
-    std::pair<int, int> toPair();
+    Point(long x, long y);
+    std::pair<long, long> toPair();
     float distanceTo(Point& b);
     float squaredDistanceTo(Point& b);
 };
@@ -39,7 +39,7 @@ struct Tile {
     sf::Texture* texture;
     int textureWidthTiles;
     int textureHeightTiles;
-    void render(int x, int y, sf::RenderWindow& window);
+    void render(long x, long y, sf::RenderWindow& window);
     Tile(terrainType terrain, int textureWidth=1, int textureHeight=1);
 };
 
@@ -47,21 +47,21 @@ class Chunk {
 private:
     Tile* tiles[CHUNK_WIDTH][CHUNK_WIDTH];
 public:
-    Tile* getTile(int x, int y);
+    Tile* getTile(long x, long y);
     explicit Chunk(WorldMap* worldMap);
 };
 
 class WorldMap {
 private:
-    std::map<int, std::map<int, Chunk*>> chunks;
+    std::map<long, std::map<long, Chunk*>> chunks;
     std::vector<sf::Texture*> uniqueTextures;
     std::vector<Tile*> uniqueTiles;
 public:
     Tile* getTile(Point coord);
-    std::pair<int, int> getChunkCoord(Point coord);
-    Chunk* getChunk(int x, int y);
-    void generateChunk(int x, int y, WorldMap* worldMap);
-    bool chunkExists(int x, int y);
+    std::pair<long, long> getChunkCoord(Point coord);
+    Chunk* getChunk(long x, long y);
+    void generateChunk(long x, long y, WorldMap* worldMap);
+    bool chunkExists(long x, long y);
     void render(sf::RenderWindow& window, Player* player);
     Tile* getUniqueTile(int tileNumber);
     bool isWalkable(Point coord);

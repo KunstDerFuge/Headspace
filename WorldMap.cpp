@@ -12,7 +12,7 @@
 
 using namespace std;
 
-Point::Point(int x, int y) {
+Point::Point(long x, long y) {
     this->x = x;
     this->y = y;
 }
@@ -27,21 +27,21 @@ float Point::distanceTo(Point& b) {
     return float(sqrt(squaredDistanceTo(b)));
 }
 
-std::pair<int, int> Point::toPair() {
+std::pair<long, long> Point::toPair() {
     return std::make_pair(x, y);
 }
 
 Tile* WorldMap::getTile(Point coord) {
     int tileX = mod(coord.x,  CHUNK_WIDTH);
     int tileY = mod(coord.y,  CHUNK_WIDTH);
-    std::pair<int, int> chunkCoord = getChunkCoord(coord);
+    std::pair<long, long> chunkCoord = getChunkCoord(coord);
     if (!chunkExists(chunkCoord.first, chunkCoord.second)) {
         generateChunk(chunkCoord.first, chunkCoord.second, this);
     }
     return chunks[chunkCoord.first][chunkCoord.second]->getTile(tileX, tileY);
 }
 
-std::pair<int, int> WorldMap::getChunkCoord(Point coord) {
+std::pair<long, long> WorldMap::getChunkCoord(Point coord) {
     if (coord.x < 0) {
         coord.x += 1;
         coord.x /= CHUNK_WIDTH;
@@ -61,18 +61,18 @@ std::pair<int, int> WorldMap::getChunkCoord(Point coord) {
     return std::make_pair(coord.x, coord.y);
 }
 
-Chunk* WorldMap::getChunk(int x, int y) {
+Chunk* WorldMap::getChunk(long x, long y) {
     return chunks[x][y];
 }
 
-void WorldMap::generateChunk(int x, int y, WorldMap* worldMap) {
+void WorldMap::generateChunk(long x, long y, WorldMap* worldMap) {
     if (chunkExists(x, y))
         cerr << "Generating chunk where one already exists: (" << x << ", " << y << ")" << endl;
     cerr << "Generating chunk at (" << x << ", " << y << ")..." << endl;
     chunks[x][y] = new Chunk(worldMap);
 }
 
-bool WorldMap::chunkExists(int x, int y) {
+bool WorldMap::chunkExists(long x, long y) {
     auto column = chunks.find(x);
     if (column == chunks.end())
         return false;
@@ -121,15 +121,15 @@ void WorldMap::render(sf::RenderWindow& window, Player* player) {
     sf::View playerView(player->getPlayerCenter(), tileToRenderCoord(viewWidthInTiles, viewHeightInTiles));
     auto renderWidthInTiles = int(viewWidthInTiles + 2);
     auto renderHeightInTiles = int(viewHeightInTiles + 2);
-    int upperLeftTileX = playerLocation.x - renderWidthInTiles / 2;
-    int upperLeftTileY = playerLocation.y - renderHeightInTiles / 2;
+    long upperLeftTileX = playerLocation.x - renderWidthInTiles / 2;
+    long upperLeftTileY = playerLocation.y - renderHeightInTiles / 2;
     playerView.setViewport(sf::FloatRect(0.f, 0.f, mapViewportWidth, 1.f));
     playerView.setSize(mapRenderSize);
     window.setView(playerView);
 
     // Render map
-    for (int x = upperLeftTileX; x < upperLeftTileX + renderWidthInTiles; ++x) {
-        for (int y = upperLeftTileY; y < upperLeftTileY + renderHeightInTiles; ++y) {
+    for (long x = upperLeftTileX; x < upperLeftTileX + renderWidthInTiles; ++x) {
+        for (long y = upperLeftTileY; y < upperLeftTileY + renderHeightInTiles; ++y) {
             auto tile = getTile(Point(x, y));
             getTile(Point(x, y))->render(x, y, window);
         }
@@ -148,7 +148,7 @@ bool WorldMap::isWalkable(Point coord) {
     return (getTile(coord)->terrain != ice);
 }
 
-Tile* Chunk::getTile(int x, int y) {
+Tile* Chunk::getTile(long x, long y) {
     return tiles[x][y];
 }
 
@@ -165,7 +165,7 @@ Chunk::Chunk(WorldMap* worldMap) {
     }
 }
 
-void Tile::render(int x, int y, sf::RenderWindow& window) {
+void Tile::render(long x, long y, sf::RenderWindow& window) {
     sf::RectangleShape tile;
     tile.setPosition(tileToRenderCoord(x, y));
     tile.setSize(sf::Vector2f(TILE_WIDTH, TILE_WIDTH));

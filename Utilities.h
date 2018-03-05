@@ -31,7 +31,7 @@ void concatenateWord(std::string& sentence, std::string word);
 std::string concatenateWordToCopy(std::string sentence, std::string word);
 std::string namePosition(int position, int numberOfPositions, bool useLeftRight);
 sf::Vector2f tileToRenderCoord(float x, float y);
-int mod(int k, int n);
+long mod(long k, long n);
 const std::string assetsPath();
 const std::string graphicsPath();
 const std::string fontsPath();

@@ -157,7 +157,7 @@ sf::Vector2f tileToRenderCoord(float x, float y) {
     return {x*TILE_WIDTH, y*TILE_WIDTH};
 }
 
-int mod(int k, int n) {  // https://stackoverflow.com/questions/12276675/modulus-with-negative-numbers-in-c
+long mod(long k, long n) {  // https://stackoverflow.com/questions/12276675/modulus-with-negative-numbers-in-c
     return ((k %= n) < 0) ? k+n : k;
 }
 
