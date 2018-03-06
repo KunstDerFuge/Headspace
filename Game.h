@@ -18,8 +18,9 @@ public:
     bool movePlayer(int dir) {
         return world->getPlayer()->move(dir);
     }
+    Player* getPlayer() {return world->getPlayer();}
     void render(sf::RenderWindow& window);
-    Game();
+    Game(const sf::RenderWindow& window);
     ~Game();
 };
 

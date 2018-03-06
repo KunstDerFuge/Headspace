@@ -2,16 +2,17 @@
 #include <SFML/Graphics.hpp>
 #include "World.h"
 #include "Game.h"
+#include "FieldOfView.h"
 
 using namespace std;
 
 int main() {
 
-    auto game = new Game();
+    sf::RenderWindow window(sf::VideoMode(2200, 1024), "Headspace");
+    auto game = new Game(window);
 
-    sf::RenderWindow window(sf::VideoMode(1024, 768), "Headspace");
     window.setFramerateLimit(60);
-    window.setVerticalSyncEnabled(false);
+    window.setVerticalSyncEnabled(true);
 
     unsigned short frameCount = 0;
     sf::Clock clock;
@@ -72,7 +73,7 @@ int main() {
         }
 
         // RENDER THE MAP
-        window.clear(sf::Color(100, 100, 100));
+        window.clear(sf::Color::Black);
         game->render(window);
 
         // Display

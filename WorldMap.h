@@ -40,7 +40,7 @@ struct Tile {
     int textureWidthTiles;
     int textureHeightTiles;
     void render(long x, long y, sf::RenderWindow& window);
-    Tile(terrainType terrain, int textureWidth=1, int textureHeight=1);
+    explicit Tile(terrainType terrain, int textureWidth=1, int textureHeight=1);
 };
 
 class Chunk {
@@ -65,6 +65,7 @@ public:
     void render(sf::RenderWindow& window, Player* player);
     Tile* getUniqueTile(int tileNumber);
     bool isWalkable(Point coord);
+    bool isOpaque(Point coord);
     explicit WorldMap();
     ~WorldMap();
 };

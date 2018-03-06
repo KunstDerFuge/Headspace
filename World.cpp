@@ -9,9 +9,9 @@
 
 using namespace std;
 
-World::World() {
+World::World(const sf::RenderWindow& window) {
     overworld = new WorldMap();
-    player = new Player(Point(0, 0));
+    player = new Player(Point(0, 0), overworld, window);
     player->placeInWorldMap(overworld);
 }
 

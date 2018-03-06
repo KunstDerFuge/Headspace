@@ -22,7 +22,7 @@ float Creature::getSize() {
     return body->size;
 }
 
-Creature *Creature::generateRandom(int sizeClass) {
+Creature *Creature::generateRandom(int sizeClass, WorldMap* worldMap) {
 
     float size;
     int locomotion;
@@ -60,7 +60,7 @@ Creature *Creature::generateRandom(int sizeClass) {
             throw;
     }
 
-    auto* creature = new Creature(Point(0, 0));
+    auto* creature = new Creature(Point(0, 0), worldMap);
     list<BodyPart*> parts;
     list<BodyRegion*> regions;
 
@@ -123,6 +123,9 @@ void Creature::setBody(Body* body) {
     this->body = body;
 }
 
-Creature::Creature(Point location) : location(location) {
+Creature::Creature(Point location, WorldMap* worldMap) : location(location), worldMap(worldMap) {
 }
 
+Point Creature::getLocation() {
+    return location;
+}

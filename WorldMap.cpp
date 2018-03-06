@@ -112,15 +112,16 @@ WorldMap::WorldMap() {
 }
 
 void WorldMap::render(sf::RenderWindow& window, Player* player) {
+    player->updateFOV();
     auto mapViewportWidth = float(1.f - CONSOLE_WIDTH);
     auto playerLocation = player->getPlayerLocation();
     auto windowSize = window.getSize();
     auto mapRenderSize = sf::Vector2f(windowSize.x * mapViewportWidth, windowSize.y);
-    auto viewWidthInTiles = mapRenderSize.x / float(TILE_WIDTH);
-    auto viewHeightInTiles = mapRenderSize.y / float(TILE_WIDTH);
+    auto viewWidthInTiles = int(mapRenderSize.x / TILE_WIDTH);
+    auto viewHeightInTiles = int(mapRenderSize.y / TILE_WIDTH);
     sf::View playerView(player->getPlayerCenter(), tileToRenderCoord(viewWidthInTiles, viewHeightInTiles));
-    auto renderWidthInTiles = int(viewWidthInTiles + 2);
-    auto renderHeightInTiles = int(viewHeightInTiles + 2);
+    auto renderWidthInTiles = viewWidthInTiles + 2;
+    auto renderHeightInTiles = viewHeightInTiles + 2;
     long upperLeftTileX = playerLocation.x - renderWidthInTiles / 2;
     long upperLeftTileY = playerLocation.y - renderHeightInTiles / 2;
     playerView.setViewport(sf::FloatRect(0.f, 0.f, mapViewportWidth, 1.f));
@@ -131,7 +132,8 @@ void WorldMap::render(sf::RenderWindow& window, Player* player) {
     for (long x = upperLeftTileX; x < upperLeftTileX + renderWidthInTiles; ++x) {
         for (long y = upperLeftTileY; y < upperLeftTileY + renderHeightInTiles; ++y) {
             auto tile = getTile(Point(x, y));
-            getTile(Point(x, y))->render(x, y, window);
+            if (player->canSee(x, y))
+                getTile(Point(x, y))->render(x, y, window);
         }
     }
 
@@ -148,6 +150,10 @@ bool WorldMap::isWalkable(Point coord) {
     return (getTile(coord)->terrain != ice);
 }
 
+bool WorldMap::isOpaque(Point coord) {
+    return !isWalkable(coord);
+}
+
 Tile* Chunk::getTile(long x, long y) {
     return tiles[x][y];
 }
@@ -155,7 +161,7 @@ Tile* Chunk::getTile(long x, long y) {
 Chunk::Chunk(WorldMap* worldMap) {
     for (auto& column : tiles) {
         for (auto &tile : column) {
-            if (randomBool(0.999)) {
+            if (randomBool(0.994)) {
                 tile = worldMap->getUniqueTile(0);
             }
             else {

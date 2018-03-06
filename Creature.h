@@ -45,17 +45,17 @@ enum AbilityTag { vision, hearing, presence_vibration_detect, smell, telepathy, 
 class Body;
 
 class Creature {
-private:
-
+protected:
     Body* body;
     Point location;
-
+    WorldMap* worldMap;
 public:
     float getWeight();
     float getSize();
-    Creature* generateRandom(int sizeClass);
+    Creature* generateRandom(int sizeClass, WorldMap* worldMap);
     void setBody(Body* body);
-    Creature(Point location);
+    Creature(Point location, WorldMap* worldMap);
+    Point getLocation();
 };
 
 

@@ -8,8 +8,8 @@ void Game::logMessage(std::wstring message, message_type type) {
     console->logMessage(message, type);
 }
 
-Game::Game() {
-    world = new World();
+Game::Game(const sf::RenderWindow& window) {
+    world = new World(window);
     console = new Console();
 }
 

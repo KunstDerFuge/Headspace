@@ -29,9 +29,10 @@ using namespace std;
 //    inventory = new Inventory();
 //}
 
-Player::Player(Point location) : location(location) {
+Player::Player(Point location, WorldMap* worldMap, const sf::RenderWindow& window) : Creature(location, worldMap) {
     texture = new sf::Texture;
     texture->loadFromFile(graphicsPath() + "/sample.png");
+    fov = new FieldOfView(this, window, TILE_WIDTH, worldMap);
 }
 
 sf::Vector2f Player::getPlayerCenter() {
@@ -89,4 +90,12 @@ bool Player::move(int direction) {
 
 void Player::placeInWorldMap(WorldMap* worldMap) {
     this->worldMap = worldMap;
+}
+
+bool Player::canSee(long x, long y) {
+    return fov->isVisible(x, y);
+}
+
+void Player::updateFOV() {
+    fov->update(this);
 }
