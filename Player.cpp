@@ -97,5 +97,5 @@ bool Player::canSee(long x, long y) {
 }
 
 void Player::updateFOV() {
-    fov->update(this);
+    fov->update();
 }

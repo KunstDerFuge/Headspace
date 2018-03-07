@@ -17,6 +17,7 @@ struct Cell {
 
 class FieldOfView {
 private:
+    Creature* creature;
     std::vector<Cell> squares;
     void castRay(Point from, Point to);
     long mapCoordToIndex(long x, long y);
@@ -28,12 +29,14 @@ private:
     void computeQuadrant(int player_x, int player_y, int dx, int dy);/* angle ranges */
     double* start_angle;
     double* end_angle;
+    int getViewWidthTiles(int resolutionX, int tileWidth);
+    int getViewHeightTiles(int resolutionY, int tileWidth);
     /* number of allocated angle pairs */
     int allocated;
 public:
     bool isVisible(long x, long y);
     void markAsVisible(long x, long y);
-    void update(Creature* creature);
+    void update();
     void invalidate(int tileWidth, const sf::RenderWindow& window);
     FieldOfView(Creature* creature, const sf::RenderWindow& window, int tileWidth, WorldMap* worldMap);
 };

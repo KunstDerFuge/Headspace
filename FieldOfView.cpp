@@ -16,17 +16,70 @@ bool FieldOfView::isVisible(long x, long y) {
     return squares[mapCoordToIndex(x, y)].visible;
 }
 
-void FieldOfView::update(Creature* creature) {
+void FieldOfView::markAsVisible(long x, long y) {
+    squares[mapCoordToIndex(x, y)].visible = true;
+}
+
+int FieldOfView::getViewWidthTiles(int resolutionX, int tileWidth) {
+    int viewWidthInTiles = resolutionX / tileWidth;
+    return viewWidthInTiles + 2;
+}
+
+int FieldOfView::getViewHeightTiles(int resolutionY, int tileWidth) {
+    int viewHeightInTiles = resolutionY / tileWidth;
+    return viewHeightInTiles + 2;
+}
+
+FieldOfView::FieldOfView(Creature* creature, const sf::RenderWindow& window, int tileWidth, WorldMap* worldMap) {
+    start_angle = nullptr;
+    end_angle = nullptr;
+    allocated = 0;
+    auto mapViewportWidth = float(1.f - CONSOLE_WIDTH);
+    auto windowSize = window.getSize();
+    this->creature = creature;
+    cout << "Window size at FOV creation: " << windowSize.x << "x" << windowSize.y << endl;
+    auto mapRenderSize = sf::Vector2i(static_cast<int>(windowSize.x * mapViewportWidth), windowSize.y);
+    this->width = getViewWidthTiles(mapRenderSize.x, tileWidth);
+    this->height = getViewHeightTiles(mapRenderSize.y, tileWidth);
+    cout << "FOV map dimensions: " << this->width << "x" << this->height << endl;
+    cout << "Creating FOV: (" << width << ", " << height << ")" << endl;
+    cout << "FOV Top left: (" << left << ", " << top << ")" << endl;
+    squares = vector<Cell>(static_cast<unsigned long>(width * height));
+    cout << "Size of squares vector: " << squares.size() << endl;
+    this->worldMap = worldMap;
+}
+
+void FieldOfView::invalidate(int tileWidth, const sf::RenderWindow& window) {
+    auto mapViewportWidth = float(1.f - CONSOLE_WIDTH);
+    auto windowSize = window.getSize();
+    auto mapRenderSize = sf::Vector2f(windowSize.x * mapViewportWidth, windowSize.y);
+    auto viewWidthInTiles = int(mapRenderSize.x / tileWidth);
+    auto viewHeightInTiles = int(mapRenderSize.y / tileWidth);
+    this->width = viewWidthInTiles;
+    this->height = viewHeightInTiles;
+    squares = vector<Cell>(static_cast<unsigned long>(width * height));
+}
+
+long FieldOfView::mapCoordToIndex(long x, long y) {
+    x -= this->left;
+    y -= this->top;
+    auto out = (y * width) + x;
+    if (out > squares.size())
+        return false;
+    return out;
+}
+
+void FieldOfView::update() {
     long square = 0;
+    auto creatureLocation = creature->getLocation();
+    this->left = creatureLocation.x - width / 2;
+    this->top = creatureLocation.y - height / 2;
     for (long y = top; y < top + height; ++y) {
         for (long x = left; x < left + width; ++x) {
             squares[square].transparent = !worldMap->isOpaque(Point(x, y));
             ++square;
         }
     }
-    auto creatureLocation = creature->getLocation();
-    this->left = creatureLocation.x - width / 2 - 1;
-    this->top = creatureLocation.y - height / 2;
     for (auto cell : squares) {
         cell.visible = false;
     }
@@ -55,121 +108,6 @@ void FieldOfView::update(Creature* creature) {
     computeQuadrant(centerX, centerY, 1, -1);
     computeQuadrant(centerX, centerY, -1, 1);
     computeQuadrant(centerX, centerY, -1, -1);
-}
-
-void FieldOfView::castRay(Point from, Point to) {
-    // Let's get Bresenheimy
-//    cout << "Casting from (" << from.x << ", " << from.y << ") to (" << to.x << ", " << to.y << ")" << endl;
-    bool swapXY = abs(to.y - from.y) > abs(to.x - from.x);
-    long x0, y0, x1, y1;
-    if (swapXY) {
-        x0 = from.y;
-        y0 = from.x;
-        x1 = to.y;
-        y1 = to.x;
-    } else {
-        x0 = from.x;
-        y0 = from.y;
-        x1 = to.x;
-        y1 = to.y;
-    }
-    float deltaX = x1 - x0;
-    float deltaY = abs(y1 - y0);
-    float error = deltaX / 2;
-    long y = y0;
-    int stepY = -1;
-    if (y0 < y1) stepY = 1;
-
-    if (x1 > x0) { // X is increasing
-        for (long x = x0; x <= x1; ++x) {
-            if (swapXY) {
-                markAsVisible(y, x);
-                error -= deltaY;
-                if (worldMap->isOpaque(Point(y, x))) {
-                    return;
-                }
-            } else {
-                markAsVisible(x, y);
-                error -= deltaY;
-                if (worldMap->isOpaque(Point(x, y))) {
-                    return;
-                }
-            }
-            if (error < 0) {
-                y += stepY;
-                error += deltaX;
-            }
-        }
-    } else { // X is decreasing
-        for (long x = x0; x >= x1; --x) {
-            if (swapXY) {
-                markAsVisible(y, x);
-                error -= deltaY;
-                if (worldMap->isOpaque(Point(y, x))) {
-                    return;
-                }
-            } else {
-                markAsVisible(x, y);
-                error -= deltaY;
-                if (worldMap->isOpaque(Point(x, y))) {
-                    return;
-                }
-            }
-            if (error < 0) {
-                y -= stepY;
-                error -= deltaX;
-            }
-        }
-    }
-}
-
-void FieldOfView::markAsVisible(long x, long y) {
-    squares[mapCoordToIndex(x, y)].visible = true;
-}
-
-FieldOfView::FieldOfView(Creature* creature, const sf::RenderWindow& window, int tileWidth, WorldMap* worldMap) {
-    start_angle = nullptr;
-    end_angle = nullptr;
-    allocated = 0;
-    auto mapViewportWidth = float(1.f - CONSOLE_WIDTH);
-    auto creatureLocation = creature->getLocation();
-    auto windowSize = window.getSize();
-    cout << "Window size at FOV creation: " << windowSize.x << "x" << windowSize.y << endl;
-    auto mapRenderSize = sf::Vector2f(windowSize.x * mapViewportWidth, windowSize.y);
-    auto viewWidthInTiles = int(mapRenderSize.x / tileWidth);
-    auto viewHeightInTiles = int(mapRenderSize.y / tileWidth);
-    auto renderWidthInTiles = viewWidthInTiles + 2;
-    auto renderHeightInTiles = viewHeightInTiles + 2;
-    this->width = renderWidthInTiles;
-    this->height = renderHeightInTiles;
-    cout << "FOV map dimensions: " << this->width << "x" << this->height << endl;
-    this->left = creatureLocation.x - renderWidthInTiles / 2;
-    this->top = creatureLocation.y - renderHeightInTiles / 2;
-    cout << "Creating FOV: (" << width << ", " << height << ")" << endl;
-    cout << "FOV Top left: (" << left << ", " << top << ")" << endl;
-    squares = vector<Cell>(static_cast<unsigned long>(width * height));
-    cout << "Size of squares vector: " << squares.size() << endl;
-    this->worldMap = worldMap;
-}
-
-void FieldOfView::invalidate(int tileWidth, const sf::RenderWindow& window) {
-    auto mapViewportWidth = float(1.f - CONSOLE_WIDTH);
-    auto windowSize = window.getSize();
-    auto mapRenderSize = sf::Vector2f(windowSize.x * mapViewportWidth, windowSize.y);
-    auto viewWidthInTiles = int(mapRenderSize.x / tileWidth);
-    auto viewHeightInTiles = int(mapRenderSize.y / tileWidth);
-    this->width = viewWidthInTiles;
-    this->height = viewHeightInTiles;
-    squares = vector<Cell>(static_cast<unsigned long>(width * height));
-}
-
-long FieldOfView::mapCoordToIndex(long x, long y) {
-    x -= this->left;
-    y -= this->top;
-    auto out = (y * width) + x;
-    if (out > squares.size())
-        return false;
-    return out;
 }
 
 void FieldOfView::computeQuadrant(int player_x, int player_y, int dx, int dy) {
@@ -339,3 +277,70 @@ void FieldOfView::computeQuadrant(int player_x, int player_y, int dx, int dy) {
         }
     }
 }
+
+void FieldOfView::castRay(Point from, Point to) {
+    // Let's get Bresenheimy
+//    cout << "Casting from (" << from.x << ", " << from.y << ") to (" << to.x << ", " << to.y << ")" << endl;
+    bool swapXY = abs(to.y - from.y) > abs(to.x - from.x);
+    long x0, y0, x1, y1;
+    if (swapXY) {
+        x0 = from.y;
+        y0 = from.x;
+        x1 = to.y;
+        y1 = to.x;
+    } else {
+        x0 = from.x;
+        y0 = from.y;
+        x1 = to.x;
+        y1 = to.y;
+    }
+    float deltaX = x1 - x0;
+    float deltaY = abs(y1 - y0);
+    float error = deltaX / 2;
+    long y = y0;
+    int stepY = -1;
+    if (y0 < y1) stepY = 1;
+
+    if (x1 > x0) { // X is increasing
+        for (long x = x0; x <= x1; ++x) {
+            if (swapXY) {
+                markAsVisible(y, x);
+                error -= deltaY;
+                if (worldMap->isOpaque(Point(y, x))) {
+                    return;
+                }
+            } else {
+                markAsVisible(x, y);
+                error -= deltaY;
+                if (worldMap->isOpaque(Point(x, y))) {
+                    return;
+                }
+            }
+            if (error < 0) {
+                y += stepY;
+                error += deltaX;
+            }
+        }
+    } else { // X is decreasing
+        for (long x = x0; x >= x1; --x) {
+            if (swapXY) {
+                markAsVisible(y, x);
+                error -= deltaY;
+                if (worldMap->isOpaque(Point(y, x))) {
+                    return;
+                }
+            } else {
+                markAsVisible(x, y);
+                error -= deltaY;
+                if (worldMap->isOpaque(Point(x, y))) {
+                    return;
+                }
+            }
+            if (error < 0) {
+                y -= stepY;
+                error -= deltaX;
+            }
+        }
+    }
+}
+

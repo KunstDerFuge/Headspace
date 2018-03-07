@@ -39,7 +39,7 @@ struct Tile {
     sf::Texture* texture;
     int textureWidthTiles;
     int textureHeightTiles;
-    void render(long x, long y, sf::RenderWindow& window);
+    void render(long x, long y, sf::RenderWindow& window, bool inFOV=true);
     explicit Tile(terrainType terrain, int textureWidth=1, int textureHeight=1);
 };
 

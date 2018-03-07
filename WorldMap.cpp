@@ -132,8 +132,7 @@ void WorldMap::render(sf::RenderWindow& window, Player* player) {
     for (long x = upperLeftTileX; x < upperLeftTileX + renderWidthInTiles; ++x) {
         for (long y = upperLeftTileY; y < upperLeftTileY + renderHeightInTiles; ++y) {
             auto tile = getTile(Point(x, y));
-            if (player->canSee(x, y))
-                getTile(Point(x, y))->render(x, y, window);
+            getTile(Point(x, y))->render(x, y, window, player->canSee(x, y));
         }
     }
 
@@ -171,14 +170,18 @@ Chunk::Chunk(WorldMap* worldMap) {
     }
 }
 
-void Tile::render(long x, long y, sf::RenderWindow& window) {
+void Tile::render(long x, long y, sf::RenderWindow& window, bool inFOV) {
     sf::RectangleShape tile;
     tile.setPosition(tileToRenderCoord(x, y));
     tile.setSize(sf::Vector2f(TILE_WIDTH, TILE_WIDTH));
-    int textureXCoord = mod(x, this->textureWidthTiles) * 32;
-    int textureYCoord = mod(y, this->textureHeightTiles) * 32;
-    tile.setTexture(this->texture);
-    tile.setTextureRect(sf::IntRect(textureXCoord, textureYCoord, 32, 32));
+    if (!inFOV) {
+        tile.setFillColor(sf::Color::Black);
+    } else {
+        int textureXCoord = mod(x, this->textureWidthTiles) * 32;
+        int textureYCoord = mod(y, this->textureHeightTiles) * 32;
+        tile.setTexture(this->texture);
+        tile.setTextureRect(sf::IntRect(textureXCoord, textureYCoord, 32, 32));
+    }
     window.draw(tile);
 }
 
