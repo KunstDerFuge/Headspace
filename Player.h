@@ -18,6 +18,7 @@ private:
     FieldOfView* fov;
 
 public:
+    bool shouldRedrawMap;
     Player(Point location, WorldMap* worldMap, const sf::RenderWindow& window);
     void takeDamage(int amount);
     bool addToInventory(Item* item);
@@ -26,6 +27,7 @@ public:
     bool move(int direction);
     bool canSee(long x, long y);
     void updateFOV();
+    void invalidateFOV(sf::RenderWindow& window);
     void render(sf::RenderWindow &window);
     void placeInWorldMap(WorldMap* worldMap);
 };

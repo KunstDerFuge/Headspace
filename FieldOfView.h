@@ -18,7 +18,7 @@ struct Cell {
 class FieldOfView {
 private:
     Creature* creature;
-    std::vector<Cell> squares;
+    std::vector<Cell> cells;
     void castRay(Point from, Point to);
     long mapCoordToIndex(long x, long y);
     WorldMap* worldMap;

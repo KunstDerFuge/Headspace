@@ -14,6 +14,8 @@ Game::Game(const sf::RenderWindow& window) {
 }
 
 void Game::render(sf::RenderWindow &window) {
+    getPlayer()->shouldRedrawMap = false;
+    window.clear(sf::Color::Black);
     world->renderMap(window);
     console->render(window);
 }

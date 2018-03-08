@@ -30,6 +30,7 @@ using namespace std;
 //}
 
 Player::Player(Point location, WorldMap* worldMap, const sf::RenderWindow& window) : Creature(location, worldMap) {
+    shouldRedrawMap = true;
     texture = new sf::Texture;
     texture->loadFromFile(graphicsPath() + "/sample.png");
     fov = new FieldOfView(this, window, TILE_WIDTH, worldMap);
@@ -52,6 +53,7 @@ void Player::render(sf::RenderWindow& window) {
 }
 
 bool Player::move(int direction) {
+    shouldRedrawMap = true;
     switch(direction) {
         case 0:
             if (worldMap->isWalkable(Point(location.x-1, location.y))) {
@@ -98,4 +100,8 @@ bool Player::canSee(long x, long y) {
 
 void Player::updateFOV() {
     fov->update();
+}
+
+void Player::invalidateFOV(sf::RenderWindow& window) {
+    fov->invalidate(TILE_WIDTH, window);
 }

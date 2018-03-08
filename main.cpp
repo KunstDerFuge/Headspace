@@ -19,11 +19,14 @@ int main() {
     double lastTime = 0;
 
     while (window.isOpen()) {
+//        game->getPlayer()->move(3);
         sf::Event event;
         ++frameCount;
-        double currentTime = clock.getElapsedTime().asSeconds();
-        double fps = 1.f / (currentTime - lastTime);
+        double currentTime = clock.getElapsedTime().asMicroseconds();
+        auto diff = static_cast<int>(currentTime - lastTime);
+        double fps = 1000000.f / (currentTime - lastTime);
         lastTime = currentTime;
+        sf::sleep(sf::milliseconds(13));
 
         if (frameCount % 64 == 0) {
             cout << "Current time: " << currentTime << endl;
@@ -70,14 +73,21 @@ int main() {
                 if (!moved)
                     game->logMessage(L"Ouch!");
             }
+            if (event.type == sf::Event::Resized) {
+                game->getPlayer()->shouldRedrawMap = true;
+                game->getPlayer()->invalidateFOV(window);
+            }
         }
 
         // RENDER THE MAP
-        window.clear(sf::Color::Black);
-        game->render(window);
+        if (game->getPlayer()->shouldRedrawMap || game->getConsole()->shouldRedrawConsole) {
+            game->render(window);
 
-        // Display
-        window.display();
+            // Display
+            window.display();
+
+            cout << "Refreshed screen!" << endl;
+        }
     }
 
 //    auto creature = new Creature(Point(0, 0));

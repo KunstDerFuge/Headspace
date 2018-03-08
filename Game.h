@@ -19,6 +19,7 @@ public:
         return world->getPlayer()->move(dir);
     }
     Player* getPlayer() {return world->getPlayer();}
+    Console* getConsole() {return console;}
     void render(sf::RenderWindow& window);
     Game(const sf::RenderWindow& window);
     ~Game();

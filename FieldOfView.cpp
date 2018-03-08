@@ -13,11 +13,11 @@ using namespace std;
 #define MIN(a,b) ((a)>(b)?(b):(a))
 
 bool FieldOfView::isVisible(long x, long y) {
-    return squares[mapCoordToIndex(x, y)].visible;
+    return cells[mapCoordToIndex(x, y)].visible;
 }
 
 void FieldOfView::markAsVisible(long x, long y) {
-    squares[mapCoordToIndex(x, y)].visible = true;
+    cells[mapCoordToIndex(x, y)].visible = true;
 }
 
 int FieldOfView::getViewWidthTiles(int resolutionX, int tileWidth) {
@@ -44,27 +44,26 @@ FieldOfView::FieldOfView(Creature* creature, const sf::RenderWindow& window, int
     cout << "FOV map dimensions: " << this->width << "x" << this->height << endl;
     cout << "Creating FOV: (" << width << ", " << height << ")" << endl;
     cout << "FOV Top left: (" << left << ", " << top << ")" << endl;
-    squares = vector<Cell>(static_cast<unsigned long>(width * height));
-    cout << "Size of squares vector: " << squares.size() << endl;
+    cells = vector<Cell>(static_cast<unsigned long>(width * height));
+    cout << "Size of cells vector: " << cells.size() << endl;
     this->worldMap = worldMap;
 }
 
 void FieldOfView::invalidate(int tileWidth, const sf::RenderWindow& window) {
     auto mapViewportWidth = float(1.f - CONSOLE_WIDTH);
     auto windowSize = window.getSize();
-    auto mapRenderSize = sf::Vector2f(windowSize.x * mapViewportWidth, windowSize.y);
-    auto viewWidthInTiles = int(mapRenderSize.x / tileWidth);
-    auto viewHeightInTiles = int(mapRenderSize.y / tileWidth);
-    this->width = viewWidthInTiles;
-    this->height = viewHeightInTiles;
-    squares = vector<Cell>(static_cast<unsigned long>(width * height));
+    auto mapRenderSize = sf::Vector2i(static_cast<int>(windowSize.x * mapViewportWidth), windowSize.y);
+    this->width = getViewWidthTiles(mapRenderSize.x, tileWidth);
+    this->height = getViewHeightTiles(mapRenderSize.y, tileWidth);
+    cout << "FOV is now " << width << "x" << height << endl;
+    cells = vector<Cell>(static_cast<unsigned long>(width * height));
 }
 
 long FieldOfView::mapCoordToIndex(long x, long y) {
     x -= this->left;
     y -= this->top;
     auto out = (y * width) + x;
-    if (out > squares.size())
+    if (out > cells.size())
         return false;
     return out;
 }
@@ -76,19 +75,19 @@ void FieldOfView::update() {
     this->top = creatureLocation.y - height / 2;
     for (long y = top; y < top + height; ++y) {
         for (long x = left; x < left + width; ++x) {
-            squares[square].transparent = !worldMap->isOpaque(Point(x, y));
+            cells[square].transparent = !worldMap->isOpaque(Point(x, y));
             ++square;
         }
     }
-    for (auto cell : squares) {
+    for (auto cell : cells) {
         cell.visible = false;
     }
     int max_obstacles;
     /*first, zero the FOV map */
-    for(long c = squares.size() - 1; c >= 0; --c) squares[c].visible = false;
+    for(long c = cells.size() - 1; c >= 0; --c) cells[c].visible = false;
 
     /*calculate an approximated (excessive, just in case) maximum number of obstacles per octant */
-    max_obstacles = static_cast<int>(squares.size() / 7);
+    max_obstacles = static_cast<int>(cells.size() / 7);
 
     if (max_obstacles > allocated) {
         allocated = max_obstacles;
@@ -99,7 +98,7 @@ void FieldOfView::update() {
     }
 
     /*set PC's position as visible */
-    squares[mapCoordToIndex(creatureLocation.x, creatureLocation.y)].visible = true;
+    cells[mapCoordToIndex(creatureLocation.x, creatureLocation.y)].visible = true;
 
     /*compute the 4 quadrants of the map */
     int centerX = static_cast<int>(creatureLocation.x - left);
@@ -142,16 +141,16 @@ void FieldOfView::computeQuadrant(int player_x, int player_y, int dx, int dy) {
                 double centre_slope = (double)processed_cell * slopes_per_cell;
                 double start_slope = centre_slope - half_slopes;
                 double end_slope = centre_slope + half_slopes;
-                if (obstacles_in_last_line > 0 && !m->squares[c].visible) {
+                if (obstacles_in_last_line > 0 && !m->cells[c].visible) {
                     int idx = 0;
-                    if ((!m->squares[c - (m->width * dy)].visible || !m->squares[c - (m->width * dy)].transparent) && (x - dx >= 0 && x - dx < m->width && (
-                            !m->squares[c - (m->width * dy) - dx].visible || !m->squares[c - (m->width * dy) - dx].transparent))) visible = false;
+                    if ((!m->cells[c - (m->width * dy)].visible || !m->cells[c - (m->width * dy)].transparent) && (x - dx >= 0 && x - dx < m->width && (
+                            !m->cells[c - (m->width * dy) - dx].visible || !m->cells[c - (m->width * dy) - dx].transparent))) visible = false;
                     else while(visible && idx < obstacles_in_last_line) {
                             if (start_angle[idx] > end_slope || end_angle[idx] < start_slope) {
                                 ++idx;
                             }
                             else {
-                                if (m->squares[c].transparent) {
+                                if (m->cells[c].transparent) {
                                     if (centre_slope > start_angle[idx] && centre_slope < end_angle[idx])
                                         visible = false;
                                 }
@@ -169,10 +168,10 @@ void FieldOfView::computeQuadrant(int player_x, int player_y, int dx, int dy) {
                         }
                 }
                 if (visible) {
-                    m->squares[c].visible = true;
+                    m->cells[c].visible = true;
                     done = false;
                     /*if the cell is opaque, block the adjacent slopes */
-                    if (!m->squares[c].transparent) {
+                    if (!m->cells[c].transparent) {
                         if (min_angle >= start_slope) {
                             min_angle = end_slope;
                             /* if min_angle is applied to the last cell in line, nothing more
@@ -183,7 +182,7 @@ void FieldOfView::computeQuadrant(int player_x, int player_y, int dx, int dy) {
                             start_angle[total_obstacles] = start_slope;
                             end_angle[total_obstacles++] = end_slope;
                         }
-                        if (!light_walls) m->squares[c].visible = false;
+                        if (!light_walls) m->cells[c].visible = false;
                     }
                 }
                 processed_cell++;
@@ -223,16 +222,16 @@ void FieldOfView::computeQuadrant(int player_x, int player_y, int dx, int dy) {
                 double centre_slope = (double)processed_cell * slopes_per_cell;
                 double start_slope = centre_slope - half_slopes;
                 double end_slope = centre_slope + half_slopes;
-                if (obstacles_in_last_line > 0 && !m->squares[c].visible) {
+                if (obstacles_in_last_line > 0 && !m->cells[c].visible) {
                     int idx = 0;
-                    if ((!m->squares[c - dx].visible || !m->squares[c - dx].transparent) && (y - dy >= 0 && y - dy < m->height && (
-                            !m->squares[c - (m->width * dy) - dx].visible || !m->squares[c - (m->width * dy) - dx].transparent))) visible = false;
+                    if ((!m->cells[c - dx].visible || !m->cells[c - dx].transparent) && (y - dy >= 0 && y - dy < m->height && (
+                            !m->cells[c - (m->width * dy) - dx].visible || !m->cells[c - (m->width * dy) - dx].transparent))) visible = false;
                     else while(visible && idx < obstacles_in_last_line) {
                             if (start_angle[idx] > end_slope || end_angle[idx] < start_slope) {
                                 ++idx;
                             }
                             else {
-                                if (m->squares[c].transparent) {
+                                if (m->cells[c].transparent) {
                                     if (centre_slope > start_angle[idx] && centre_slope < end_angle[idx])
                                         visible = false;
                                 }
@@ -250,10 +249,10 @@ void FieldOfView::computeQuadrant(int player_x, int player_y, int dx, int dy) {
                         }
                 }
                 if (visible) {
-                    m->squares[c].visible = true;
+                    m->cells[c].visible = true;
                     done = false;
                     /*if the cell is opaque, block the adjacent slopes */
-                    if (!m->squares[c].transparent) {
+                    if (!m->cells[c].transparent) {
                         if (min_angle >= start_slope) {
                             min_angle = end_slope;
                             /* if min_angle is applied to the last cell in line, nothing more
@@ -264,7 +263,7 @@ void FieldOfView::computeQuadrant(int player_x, int player_y, int dx, int dy) {
                             start_angle[total_obstacles] = start_slope;
                             end_angle[total_obstacles++] = end_slope;
                         }
-                        if (!light_walls) m->squares[c].visible = false;
+                        if (!light_walls) m->cells[c].visible = false;
                     }
                 }
                 processed_cell++;

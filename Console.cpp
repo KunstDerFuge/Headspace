@@ -16,6 +16,7 @@
 using namespace std;
 
 void Console::logMessage(std::wstring& message, message_type& type) {
+    shouldRedrawConsole = true;
     if (messages.empty()) { // Calling getLastMessage() with no messages will crash
         messages.emplace_back(message, type);
         return;
@@ -29,6 +30,7 @@ void Console::logMessage(std::wstring& message, message_type& type) {
 }
 
 void Console::render(sf::RenderWindow& window) {
+    shouldRedrawConsole = false;
     // Render console
     sf::Vector2u windowSize = window.getSize();
     sf::View uiView(sf::FloatRect(0.f, 0.f, windowSize.x, windowSize.y));
@@ -95,6 +97,7 @@ wstring Console::getMessageString(int i) const {
 }
 
 Console::Console() {
+    shouldRedrawConsole = true;
     if (!font.loadFromFile(fontsPath() + "/PxPlus_IBM_VGA8.ttf")) {
         cerr << "Could not load terminal font!" << endl;
     }

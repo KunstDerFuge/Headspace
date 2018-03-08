@@ -50,6 +50,7 @@ private:
     std::vector<Message> messages;
     sf::Font font;
 public:
+    bool shouldRedrawConsole;
     void logMessage(std::wstring& message, message_type& type);
     Message& getLastMessage();
     void render(sf::RenderWindow& window);

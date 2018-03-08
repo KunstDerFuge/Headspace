@@ -141,7 +141,7 @@ void WorldMap::render(sf::RenderWindow& window, Player* player) {
 
 }
 
-Tile *WorldMap::getUniqueTile(int tileNumber) {
+Tile* WorldMap::getUniqueTile(int tileNumber) {
     return uniqueTiles[tileNumber];
 }
 
@@ -159,8 +159,8 @@ Tile* Chunk::getTile(long x, long y) {
 
 Chunk::Chunk(WorldMap* worldMap) {
     for (auto& column : tiles) {
-        for (auto &tile : column) {
-            if (randomBool(0.994)) {
+        for (auto& tile : column) {
+            if (randomBool(0.99)) {
                 tile = worldMap->getUniqueTile(0);
             }
             else {
@@ -175,10 +175,11 @@ void Tile::render(long x, long y, sf::RenderWindow& window, bool inFOV) {
     tile.setPosition(tileToRenderCoord(x, y));
     tile.setSize(sf::Vector2f(TILE_WIDTH, TILE_WIDTH));
     if (!inFOV) {
-        tile.setFillColor(sf::Color::Black);
+        return;
+//        tile.setFillColor(sf::Color::Black);
     } else {
-        int textureXCoord = mod(x, this->textureWidthTiles) * 32;
-        int textureYCoord = mod(y, this->textureHeightTiles) * 32;
+        auto textureXCoord = int(mod(x, this->textureWidthTiles) * 32);
+        auto textureYCoord = int(mod(y, this->textureHeightTiles) * 32);
         tile.setTexture(this->texture);
         tile.setTextureRect(sf::IntRect(textureXCoord, textureYCoord, 32, 32));
     }
