@@ -12,25 +12,6 @@
 
 using namespace std;
 
-Point::Point(long x, long y) {
-    this->x = x;
-    this->y = y;
-}
-
-float Point::squaredDistanceTo(Point& b) {
-    float dx = b.x - this->x;
-    float dy = b.y - this->y;
-    return (dx*dx) + (dy*dy);
-}
-
-float Point::distanceTo(Point& b) {
-    return float(sqrt(squaredDistanceTo(b)));
-}
-
-std::pair<long, long> Point::toPair() {
-    return std::make_pair(x, y);
-}
-
 Tile* WorldMap::getTile(Point coord) {
     int tileX = mod(coord.x,  CHUNK_WIDTH);
     int tileY = mod(coord.y,  CHUNK_WIDTH);
@@ -112,9 +93,11 @@ WorldMap::WorldMap() {
 }
 
 void WorldMap::render(sf::RenderWindow& window, Player* player) {
-    player->updateFOV();
+    if (player->shouldRedrawMap)
+        player->updateFOV();
+    player->shouldRedrawMap = false;
     auto mapViewportWidth = float(1.f - CONSOLE_WIDTH);
-    auto playerLocation = player->getPlayerLocation();
+    auto playerLocation = player->getLocation();
     auto windowSize = window.getSize();
     auto mapRenderSize = sf::Vector2f(windowSize.x * mapViewportWidth, windowSize.y);
     auto viewWidthInTiles = int(mapRenderSize.x / TILE_WIDTH);
@@ -153,6 +136,51 @@ bool WorldMap::isOpaque(Point coord) {
     return !isWalkable(coord);
 }
 
+void WorldMap::addCreature(Creature* creature) {
+    creatures.push_back(creature);
+}
+
+bool WorldMap::isWalkable(Player* player, direction dir) {
+    int offsetX = 0;
+    int offsetY = 0;
+    switch (dir) {
+        case north:
+            offsetY = -1;
+            break;
+        case south:
+            offsetY = 1;
+            break;
+        case east:
+            offsetX = 1;
+            break;
+        case west:
+            offsetX = -1;
+            break;
+        case northwest:
+            offsetX = -1;
+            offsetY = -1;
+            break;
+        case northeast:
+            offsetX = 1;
+            offsetY = -1;
+            break;
+        case southwest:
+            offsetX = -1;
+            offsetY = 1;
+            break;
+        case southeast:
+            offsetX = 1;
+            offsetY = 1;
+            break;
+    }
+    Point playerLocation = player->getLocation();
+    return isWalkable(Point(playerLocation.x + offsetX, playerLocation.y + offsetY));
+}
+
+vector<Creature*>* WorldMap::getCreatures() {
+    return &creatures;
+}
+
 Tile* Chunk::getTile(long x, long y) {
     return tiles[x][y];
 }
@@ -170,24 +198,3 @@ Chunk::Chunk(WorldMap* worldMap) {
     }
 }
 
-void Tile::render(long x, long y, sf::RenderWindow& window, bool inFOV) {
-    sf::RectangleShape tile;
-    tile.setPosition(tileToRenderCoord(x, y));
-    tile.setSize(sf::Vector2f(TILE_WIDTH, TILE_WIDTH));
-    if (!inFOV) {
-        return;
-//        tile.setFillColor(sf::Color::Black);
-    } else {
-        auto textureXCoord = int(mod(x, this->textureWidthTiles) * 32);
-        auto textureYCoord = int(mod(y, this->textureHeightTiles) * 32);
-        tile.setTexture(this->texture);
-        tile.setTextureRect(sf::IntRect(textureXCoord, textureYCoord, 32, 32));
-    }
-    window.draw(tile);
-}
-
-Tile::Tile(terrainType terrain, int textureWidth, int textureHeight) {
-    this->terrain = terrain;
-    this->textureWidthTiles = textureWidth;
-    this->textureHeightTiles = textureHeight;
-}

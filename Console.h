@@ -6,6 +6,7 @@
 #define HEADSPACE_CONSOLE_H
 
 #include <string>
+#include <utility>
 #include <vector>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Text.hpp>
@@ -39,7 +40,7 @@ struct Message {
     message_type type;
     int count;
     Message(std::wstring message, message_type type) {
-        this->message = message;
+        this->message = std::move(message);
         this->type = type;
         count = 1;
     }

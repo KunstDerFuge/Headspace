@@ -5,11 +5,11 @@
 #include <iostream>
 #include <vector>
 #include <tgmath.h>
+#include <SFML/Graphics/RectangleShape.hpp>
 
 #include "Creature.h"
 #include "Body.h"
-#include "Utilities.h"
-
+#include "Player.h"
 
 using namespace std;
 
@@ -59,8 +59,9 @@ Creature *Creature::generateRandom(int sizeClass, WorldMap* worldMap) {
             cerr << "Unknown size class: " << sizeClass << endl;
             throw;
     }
-
-    auto* creature = new Creature(Point(0, 0), worldMap);
+    auto randomX = randomFromXToY(-1000, 1000);
+    auto randomY = randomFromXToY(-1000, 1000);
+    auto* creature = new Creature(Point(randomX, randomY), worldMap);
     list<BodyPart*> parts;
     list<BodyRegion*> regions;
 
@@ -124,8 +125,56 @@ void Creature::setBody(Body* body) {
 }
 
 Creature::Creature(Point location, WorldMap* worldMap) : location(location), worldMap(worldMap) {
+    worldMap->addCreature(this);
 }
 
 Point Creature::getLocation() {
     return location;
+}
+
+void Creature::render(sf::Texture* texture, VisibleMap* visibleMap, sf::RenderWindow& window) {
+    sf::RectangleShape tile;
+    tile.setPosition(visibleMap->getRenderCoord(location));
+    tile.setSize(sf::Vector2f(TILE_WIDTH, TILE_WIDTH));
+    tile.setTexture(texture);
+    window.draw(tile);
+}
+
+WorldMap *Creature::getWorldMap() {
+    return worldMap;
+}
+
+Point Creature::getAdjacentLocation(direction dir) {
+    Point loc = this->location;
+    switch (dir) {
+        case north:
+            --loc.y;
+            break;
+        case south:
+            ++loc.y;
+            break;
+        case east:
+            ++loc.x;
+            break;
+        case west:
+            --loc.x;
+            break;
+        case northwest:
+            --loc.x;
+            --loc.y;
+            break;
+        case northeast:
+            ++loc.x;
+            --loc.y;
+            break;
+        case southwest:
+            --loc.x;
+            ++loc.y;
+            break;
+        case southeast:
+            ++loc.x;
+            ++loc.y;
+            break;
+    }
+    return loc;
 }

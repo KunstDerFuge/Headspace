@@ -35,10 +35,15 @@ private:
     int allocated;
 public:
     bool isVisible(long x, long y);
+    bool isVisible(Point location);
     void markAsVisible(long x, long y);
     void update();
     void invalidate(int tileWidth, const sf::RenderWindow& window);
     FieldOfView(Creature* creature, const sf::RenderWindow& window, int tileWidth, WorldMap* worldMap);
+    int getWidth();
+    int getHeight();
+    long getTop();
+    long getLeft();
 };
 
 

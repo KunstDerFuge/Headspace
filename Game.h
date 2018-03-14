@@ -13,13 +13,13 @@ class Game {
 private:
     World* world;
     Console* console;
+    sf::Texture lastState;
 public:
     void logMessage(std::wstring message, message_type type=info);
-    bool movePlayer(int dir) {
-        return world->getPlayer()->move(dir);
-    }
+    bool movePlayer(direction dir);
     Player* getPlayer() {return world->getPlayer();}
     Console* getConsole() {return console;}
+    std::vector<Creature*> getCreaturesAt(Point location, WorldMap* worldMap);
     void render(sf::RenderWindow& window);
     Game(const sf::RenderWindow& window);
     ~Game();

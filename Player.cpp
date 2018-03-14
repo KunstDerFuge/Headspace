@@ -5,7 +5,8 @@
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <iostream>
 #include "Player.h"
-#include "Utilities.h"
+#include "FieldOfView.h"
+#include "Creature.h"
 
 using namespace std;
 
@@ -34,57 +35,59 @@ Player::Player(Point location, WorldMap* worldMap, const sf::RenderWindow& windo
     texture = new sf::Texture;
     texture->loadFromFile(graphicsPath() + "/sample.png");
     fov = new FieldOfView(this, window, TILE_WIDTH, worldMap);
+    visibleMap = new VisibleMap(fov, worldMap);
 }
 
 sf::Vector2f Player::getPlayerCenter() {
     return {location.x*TILE_WIDTH + (TILE_WIDTH/2), location.y*TILE_WIDTH + (TILE_WIDTH/2)};
 }
 
-Point Player::getPlayerLocation() {
-    return location;
-}
-
 void Player::render(sf::RenderWindow& window) {
     sf::RectangleShape tile;
-    tile.setPosition(tileToRenderCoord(location.x, location.y));
+    sf::Vector2f mapCenter = visibleMap->getCenter();
+    float halfTileWidth = TILE_WIDTH / 2.f;
+    tile.setPosition(sf::Vector2f(mapCenter.x - halfTileWidth, mapCenter.y - halfTileWidth));
     tile.setSize(sf::Vector2f(TILE_WIDTH, TILE_WIDTH));
     tile.setTexture(texture);
-    window.draw(tile);
+//    window.draw(tile);
 }
 
-bool Player::move(int direction) {
+bool Player::move(direction dir) {
     shouldRedrawMap = true;
-    switch(direction) {
-        case 0:
-            if (worldMap->isWalkable(Point(location.x-1, location.y))) {
-                --location.x;
-            } else {
-                return false;
-            }
+    if (!worldMap->isWalkable(this, dir))
+        return false;
+
+    switch(dir) {
+        case west:
+            --location.x;
             break;
-        case 1:
-            if (worldMap->isWalkable(Point(location.x, location.y+1))) {
-                ++location.y;
-            } else {
-                return false;
-            }
+        case north:
+            --location.y;
             break;
-        case 2:
-            if (worldMap->isWalkable(Point(location.x, location.y-1))) {
-                --location.y;
-            } else {
-                return false;
-            }
+        case south:
+            ++location.y;
             break;
-        case 3:
-            if (worldMap->isWalkable(Point(location.x+1, location.y))) {
-                ++location.x;
-            } else {
-                return false;
-            }
+        case east:
+            ++location.x;
+            break;
+        case northwest:
+            --location.x;
+            --location.y;
+            break;
+        case northeast:
+            ++location.x;
+            --location.y;
+            break;
+        case southwest:
+            --location.x;
+            ++location.y;
+            break;
+        case southeast:
+            ++location.x;
+            ++location.y;
             break;
         default:
-        cerr << "Tried to move in nonexistent direction: " << direction << endl;
+        cerr << "Tried to move in nonexistent direction: " << dir << endl;
         return false;
     }
     return true;
@@ -99,9 +102,143 @@ bool Player::canSee(long x, long y) {
 }
 
 void Player::updateFOV() {
+    cout << "Updating FOV" << endl;
     fov->update();
 }
 
-void Player::invalidateFOV(sf::RenderWindow& window) {
+void Player::resizeFOV(sf::RenderWindow &window) {
     fov->invalidate(TILE_WIDTH, window);
+}
+
+void Player::updateVisible() {
+    visibleMap->updateVisible();
+}
+
+void Player::resizeVisible() {
+    visibleMap->resize();
+}
+
+void Player::renderMap(sf::RenderWindow &window) {
+    if (shouldRedrawMap) {
+        updateFOV();
+        updateVisible();
+    }
+    shouldRedrawMap = false;
+    sf::View playerView;
+    auto mapViewportWidth = float(1.f - CONSOLE_WIDTH);
+    auto visibleMapCenter = visibleMap->getCenter();
+    playerView.setViewport(sf::FloatRect(0.f, 0.f, mapViewportWidth, 1.f));
+    auto windowSize = window.getSize();
+    auto mapRenderSize = sf::Vector2f(int(windowSize.x * mapViewportWidth), windowSize.y);
+    playerView.setSize(mapRenderSize);
+    playerView.setCenter(visibleMapCenter);
+    window.setView(playerView);
+    window.draw(visibleMap->tileMap, visibleMap->texture);
+}
+
+void Player::renderMonsters(sf::RenderWindow& window) {
+    auto creatures = *worldMap->getCreatures();
+    for (auto &creature : creatures) {
+        if (!visibleMap->isOnScreen(creature->getLocation()))
+            continue;
+        if (fov->isVisible(creature->getLocation())) {
+            creature->render(texture, visibleMap, window);
+        }
+    }
+}
+
+VisibleMap::VisibleMap(FieldOfView* fov, WorldMap* worldMap) {
+    this->width = fov->getWidth();
+    this->height = fov->getHeight();
+    this->worldMap = worldMap;
+    this->fov = fov;
+    tiles = new Tile*[width * height];
+    tileMap.setPrimitiveType(sf::Quads);
+    tileMap.resize(static_cast<size_t>(width * height * 4));
+    texture = new sf::Texture;
+    if (!texture->loadFromFile(graphicsPath() + "/dirt_seamless_shrink.jpg")) {
+        cerr << "Could not load texture!" << endl;
+    } else {
+        cout << "Loaded texture" << endl;
+    }
+}
+
+void VisibleMap::updateVisible() {
+    long left = fov->getLeft();
+    long top = fov->getTop();
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            tiles[localCoordToIndex(x, y)] = worldMap->getTile(Point(x + left, y + top));
+            tileMap.setPrimitiveType(sf::Quads);
+            tileMap.resize(static_cast<size_t>(width * height * 4));
+            float tileTop = y * TILE_WIDTH;
+            float tileLeft = x * TILE_WIDTH;
+            int quadIndex = localCoordToIndex(x, y) * 4;
+            sf::Vertex* quad = &tileMap[quadIndex];
+            if (!fov->isVisible(left + x, top + y)) {
+                quad[0].color = sf::Color::Blue;
+                quad[1].color = sf::Color::Blue;
+                quad[2].color = sf::Color::Blue;
+                quad[3].color = sf::Color::Blue;
+            } else {
+                quad[0].color = sf::Color::White;
+                quad[1].color = sf::Color::White;
+                quad[2].color = sf::Color::White;
+                quad[3].color = sf::Color::White;
+            }
+            quad[0].position = sf::Vector2f(tileLeft, tileTop);
+            quad[1].position = sf::Vector2f(tileLeft + TILE_WIDTH, tileTop);
+            quad[2].position = sf::Vector2f(tileLeft + TILE_WIDTH, tileTop + TILE_WIDTH);
+            quad[3].position = sf::Vector2f(tileLeft, tileTop + TILE_WIDTH);
+            auto texCoordX = mod((left + x) * 32, 256);
+            auto texCoordY = mod((top + y) * 32, 256);
+            quad[0].texCoords = sf::Vector2f(texCoordX, texCoordY);
+            quad[1].texCoords = sf::Vector2f(texCoordX + TILE_WIDTH, texCoordY);
+            quad[2].texCoords = sf::Vector2f(texCoordX + TILE_WIDTH, texCoordY + TILE_WIDTH);
+            quad[3].texCoords = sf::Vector2f(texCoordX, texCoordY + TILE_WIDTH);
+//            quad[0].color = sf::Color::Magenta;
+//            quad[1].color = sf::Color::Green;
+//            quad[2].color = sf::Color::Black;
+//            quad[3].color = sf::Color::White;
+//            tileMap.append(sf::Vertex(sf::Vector2f(tileLeft, tileTop)));
+//            tileMap.append(sf::Vertex(sf::Vector2f(tileLeft + TILE_WIDTH, tileTop)));
+//            tileMap.append(sf::Vertex(sf::Vector2f(tileLeft + TILE_WIDTH, tileTop + TILE_WIDTH)));
+//            tileMap.append(sf::Vertex(sf::Vector2f(tileLeft, tileTop + TILE_WIDTH)));
+        }
+    }
+}
+
+int VisibleMap::localCoordToIndex(int x, int y) {
+    return (y * width) + x;
+}
+
+sf::Vector2f VisibleMap::getCenter() {
+    auto bounds = tileMap.getBounds();
+    auto centerX = bounds.left + (bounds.width / 2.f);
+    auto centerY = bounds.top + (bounds.height / 2.f);
+    return sf::Vector2f(centerX, centerY);
+}
+
+void VisibleMap::resize() {
+    width = fov->getWidth();
+    height = fov->getHeight();
+    tiles = new Tile*[width * height];
+    tileMap.resize(static_cast<size_t>(width * height * 4));
+}
+
+sf::Vector2f VisibleMap::getRenderCoord(Point location) {
+    long left = fov->getLeft();
+    long top = fov->getTop();
+    if (!isOnScreen(location)) {
+        return {-10000, -10000};
+    }
+    float widthPerTile = tileMap.getBounds().width / this->width;
+    float heightPerTile = tileMap.getBounds().height / this->height;
+    return {(location.x - left) * widthPerTile, (location.y - top) * heightPerTile};
+}
+
+bool VisibleMap::isOnScreen(Point location) {
+    long left = fov->getLeft();
+    long top = fov->getTop();
+    return !(location.x < left || location.x > left + width || location.y < top || location.y > top + height);
 }

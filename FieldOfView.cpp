@@ -41,6 +41,8 @@ FieldOfView::FieldOfView(Creature* creature, const sf::RenderWindow& window, int
     auto mapRenderSize = sf::Vector2i(static_cast<int>(windowSize.x * mapViewportWidth), windowSize.y);
     this->width = getViewWidthTiles(mapRenderSize.x, tileWidth);
     this->height = getViewHeightTiles(mapRenderSize.y, tileWidth);
+    if (width % 2 == 0) --width;
+    if (height % 2 == 0) --height;
     cout << "FOV map dimensions: " << this->width << "x" << this->height << endl;
     cout << "Creating FOV: (" << width << ", " << height << ")" << endl;
     cout << "FOV Top left: (" << left << ", " << top << ")" << endl;
@@ -55,6 +57,8 @@ void FieldOfView::invalidate(int tileWidth, const sf::RenderWindow& window) {
     auto mapRenderSize = sf::Vector2i(static_cast<int>(windowSize.x * mapViewportWidth), windowSize.y);
     this->width = getViewWidthTiles(mapRenderSize.x, tileWidth);
     this->height = getViewHeightTiles(mapRenderSize.y, tileWidth);
+    if (width % 2 == 0) --width;
+    if (height % 2 == 0) --height;
     cout << "FOV is now " << width << "x" << height << endl;
     cells = vector<Cell>(static_cast<unsigned long>(width * height));
 }
@@ -341,5 +345,25 @@ void FieldOfView::castRay(Point from, Point to) {
             }
         }
     }
+}
+
+int FieldOfView::getWidth() {
+    return width;
+}
+
+int FieldOfView::getHeight() {
+    return height;
+}
+
+long FieldOfView::getTop() {
+    return top;
+}
+
+long FieldOfView::getLeft() {
+    return left;
+}
+
+bool FieldOfView::isVisible(Point location) {
+    return isVisible(location.x, location.y);
 }
 

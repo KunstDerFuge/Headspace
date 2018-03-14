@@ -2,13 +2,12 @@
 #include <SFML/Graphics.hpp>
 #include "World.h"
 #include "Game.h"
-#include "FieldOfView.h"
 
 using namespace std;
 
 int main() {
 
-    sf::RenderWindow window(sf::VideoMode(2200, 1024), "Headspace");
+    sf::RenderWindow window(sf::VideoMode(1024, 768), "Headspace");
     auto game = new Game(window);
 
     window.setFramerateLimit(60);
@@ -26,8 +25,6 @@ int main() {
         auto diff = static_cast<int>(currentTime - lastTime);
         double fps = 1000000.f / (currentTime - lastTime);
         lastTime = currentTime;
-        sf::sleep(sf::milliseconds(13));
-
         if (frameCount % 64 == 0) {
             cout << "Current time: " << currentTime << endl;
             cout << "Last time: " << lastTime << endl;
@@ -59,35 +56,35 @@ int main() {
                 unsigned int key = event.text.unicode;
                 bool moved = true;
                 if (key == 'w' || key == 'k') {
-                    moved = game->movePlayer(2);
+                    moved = game->movePlayer(north);
                 }
                 if (key == 'a' || key == 'h') {
-                    moved = game->movePlayer(0);
+                    moved = game->movePlayer(west);
                 }
                 if (key == 's' || key == 'j') {
-                    moved = game->movePlayer(1);
+                    moved = game->movePlayer(south);
                 }
                 if (key == 'd' || key == 'l') {
-                    moved = game->movePlayer(3);
+                    moved = game->movePlayer(east);
+                }
+                if (key == 'y' || key == '7') {
+                    moved = game->movePlayer(northwest);
                 }
                 if (!moved)
                     game->logMessage(L"Ouch!");
             }
             if (event.type == sf::Event::Resized) {
                 game->getPlayer()->shouldRedrawMap = true;
-                game->getPlayer()->invalidateFOV(window);
+                game->getPlayer()->resizeFOV(window);
+                game->getPlayer()->resizeVisible();
             }
         }
 
         // RENDER THE MAP
-        if (game->getPlayer()->shouldRedrawMap || game->getConsole()->shouldRedrawConsole) {
-            game->render(window);
+        game->render(window);
 
-            // Display
-            window.display();
-
-            cout << "Refreshed screen!" << endl;
-        }
+        // Display
+        window.display();
     }
 
 //    auto creature = new Creature(Point(0, 0));

@@ -7,10 +7,44 @@
 
 #include <vector>
 #include <string>
-#include "WorldMap.h"
+#include <SFML/System.hpp>
+#include <map>
+#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Texture.hpp>
 
+#define CHUNK_WIDTH 64  // Width and height of a chunk in tiles
+#define TILE_WIDTH 32  // Width and height of a tile in pixels
+#define CONSOLE_WIDTH 0.2  // Width of the console as a fraction of the window width
 
-struct Point;
+enum direction {
+    north, south, east, west, northwest, northeast, southwest, southeast
+};
+
+enum terrainType {
+    dirt, sand, boulder, gravel, water, ice
+};
+
+class WorldMap;
+
+struct Point {
+    long x;
+    long y;
+
+    Point(long x, long y);
+    std::pair<long, long> toPair();
+    float distanceTo(Point& b);
+    float squaredDistanceTo(Point& b);
+    bool operator== (const Point& other);
+};
+
+struct Tile {
+    terrainType terrain;
+    sf::Texture* texture;
+    int textureWidthTiles;
+    int textureHeightTiles;
+    void render(long x, long y, sf::RenderWindow& window, bool inFOV=true);
+    explicit Tile(terrainType terrain, int textureWidth=1, int textureHeight=1);
+};
 
 int randomChoiceOfN(int n);
 int randomFromXToY(int x, int y);

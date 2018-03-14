@@ -43,6 +43,7 @@ enum AbilityTag { vision, hearing, presence_vibration_detect, smell, telepathy, 
                     bite, scratch, bash, secrete_acid, bloodsucking, telekinesis };
 
 class Body;
+class VisibleMap;
 
 class Creature {
 protected:
@@ -56,6 +57,9 @@ public:
     void setBody(Body* body);
     Creature(Point location, WorldMap* worldMap);
     Point getLocation();
+    WorldMap* getWorldMap();
+    Point getAdjacentLocation(direction dir);
+    void render(sf::Texture* texture, VisibleMap* visibleMap, sf::RenderWindow& window);
 };
 
 

@@ -2,6 +2,9 @@
 // Created by KunstDerFuge on 1/26/18.
 //
 
+#include <SFML/Graphics/Texture.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
+#include "WorldMap.h"
 #include <random>
 #include <iostream>
 #include <algorithm>
@@ -154,7 +157,7 @@ std::string toPossessive(std::string in) {
 }
 
 sf::Vector2f tileToRenderCoord(float x, float y) {
-    return {x*TILE_WIDTH, y*TILE_WIDTH};
+    return {static_cast<int>(x * TILE_WIDTH), static_cast<int>(y * TILE_WIDTH)};
 }
 
 long mod(long k, long n) {  // https://stackoverflow.com/questions/12276675/modulus-with-negative-numbers-in-c
@@ -172,4 +175,49 @@ const std::string fontsPath() {
 }
 const std::string shadersPath() {
     return assetsPath() + "/shaders";
+}
+
+Point::Point(long x, long y) {
+    this->x = x;
+    this->y = y;
+}
+
+float Point::squaredDistanceTo(Point& b) {
+    float dx = b.x - this->x;
+    float dy = b.y - this->y;
+    return (dx*dx) + (dy*dy);
+}
+
+float Point::distanceTo(Point& b) {
+    return float(sqrt(squaredDistanceTo(b)));
+}
+
+pair<long, long> Point::toPair() {
+    return make_pair(x, y);
+}
+
+bool Point::operator==(const Point &other) {
+    return this->x == other.x && this->y == other.y;
+}
+
+void Tile::render(long x, long y, sf::RenderWindow& window, bool inFOV) {
+    sf::RectangleShape tile;
+    tile.setPosition(tileToRenderCoord(x, y));
+    tile.setSize(sf::Vector2f(TILE_WIDTH, TILE_WIDTH));
+    if (!inFOV) {
+        return;
+//        tile.setFillColor(sf::Color::Black);
+    } else {
+        auto textureXCoord = int(mod(x, this->textureWidthTiles) * 32);
+        auto textureYCoord = int(mod(y, this->textureHeightTiles) * 32);
+        tile.setTexture(this->texture);
+        tile.setTextureRect(sf::IntRect(textureXCoord, textureYCoord, 32, 32));
+    }
+    window.draw(tile);
+}
+
+Tile::Tile(terrainType terrain, int textureWidth, int textureHeight) {
+    this->terrain = terrain;
+    this->textureWidthTiles = textureWidth;
+    this->textureHeightTiles = textureHeight;
 }
