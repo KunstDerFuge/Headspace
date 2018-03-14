@@ -58,7 +58,7 @@ public:
     Creature(Point location, WorldMap* worldMap);
     Point getLocation();
     WorldMap* getWorldMap();
-    Point getAdjacentLocation(direction dir);
+    Point getAdjacentPoint(direction dir);
     void render(sf::Texture* texture, VisibleMap* visibleMap, sf::RenderWindow& window);
 };
 

@@ -6,7 +6,6 @@
 #include <iostream>
 #include "Player.h"
 #include "FieldOfView.h"
-#include "Creature.h"
 
 using namespace std;
 
@@ -34,8 +33,12 @@ Player::Player(Point location, WorldMap* worldMap, const sf::RenderWindow& windo
     shouldRedrawMap = true;
     texture = new sf::Texture;
     texture->loadFromFile(graphicsPath() + "/sample.png");
+    cursorTexture = new sf::Texture;
+    cursorTexture->loadFromFile(graphicsPath() + "/cursor.png");
     fov = new FieldOfView(this, window, TILE_WIDTH, worldMap);
     visibleMap = new VisibleMap(fov, worldMap);
+    focus = nullptr;
+    examining = false;
 }
 
 sf::Vector2f Player::getPlayerCenter() {
@@ -144,6 +147,48 @@ void Player::renderMonsters(sf::RenderWindow& window) {
         if (fov->isVisible(creature->getLocation())) {
             creature->render(texture, visibleMap, window);
         }
+    }
+}
+
+void Player::examine() {
+    examining = true;
+    focus = new Point(location);
+}
+
+void Player::cancelAll() {
+    examining = false;
+    delete focus;
+    focus = nullptr;
+    shouldRedrawMap = true;
+}
+
+Point Player::getFocus() {
+    if (focus == nullptr)
+        return location;
+    return *focus;
+}
+
+void Player::moveFocus(direction dir) {
+    if (focus == nullptr)
+        focus = new Point(location);
+    auto newFocus = getAdjacentLocation(*focus, dir);
+    focus->x = newFocus.x;
+    focus->y = newFocus.y;
+    updateFOV();
+    updateVisible();
+}
+
+VisibleMap *Player::getVisibleMap() {
+    return visibleMap;
+}
+
+void Player::renderCursors(sf::RenderWindow& window) {
+    if (examining) {
+        sf::RectangleShape cursor;
+        cursor.setPosition(visibleMap->getRenderCoord(getFocus()));
+        cursor.setSize(sf::Vector2f(TILE_WIDTH, TILE_WIDTH));
+        cursor.setTexture(cursorTexture);
+        window.draw(cursor);
     }
 }
 

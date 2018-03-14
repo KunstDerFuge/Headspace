@@ -144,37 +144,6 @@ WorldMap *Creature::getWorldMap() {
     return worldMap;
 }
 
-Point Creature::getAdjacentLocation(direction dir) {
-    Point loc = this->location;
-    switch (dir) {
-        case north:
-            --loc.y;
-            break;
-        case south:
-            ++loc.y;
-            break;
-        case east:
-            ++loc.x;
-            break;
-        case west:
-            --loc.x;
-            break;
-        case northwest:
-            --loc.x;
-            --loc.y;
-            break;
-        case northeast:
-            ++loc.x;
-            --loc.y;
-            break;
-        case southwest:
-            --loc.x;
-            ++loc.y;
-            break;
-        case southeast:
-            ++loc.x;
-            ++loc.y;
-            break;
-    }
-    return loc;
+Point Creature::getAdjacentPoint(direction dir) {
+    return getAdjacentLocation(location, dir);
 }

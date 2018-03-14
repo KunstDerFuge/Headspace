@@ -70,5 +70,6 @@ const std::string assetsPath();
 const std::string graphicsPath();
 const std::string fontsPath();
 const std::string shadersPath();
+Point getAdjacentLocation(Point loc, direction dir);
 
 #endif //HEADSPACE_UTILITIES_H

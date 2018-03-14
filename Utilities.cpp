@@ -177,6 +177,40 @@ const std::string shadersPath() {
     return assetsPath() + "/shaders";
 }
 
+Point getAdjacentLocation(Point loc, direction dir) {
+    switch (dir) {
+        case north:
+            --loc.y;
+            break;
+        case south:
+            ++loc.y;
+            break;
+        case east:
+            ++loc.x;
+            break;
+        case west:
+            --loc.x;
+            break;
+        case northwest:
+            --loc.x;
+            --loc.y;
+            break;
+        case northeast:
+            ++loc.x;
+            --loc.y;
+            break;
+        case southwest:
+            --loc.x;
+            ++loc.y;
+            break;
+        case southeast:
+            ++loc.x;
+            ++loc.y;
+            break;
+    }
+    return loc;
+}
+
 Point::Point(long x, long y) {
     this->x = x;
     this->y = y;

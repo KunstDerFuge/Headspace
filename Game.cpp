@@ -25,6 +25,7 @@ void Game::render(sf::RenderWindow &window) {
     world->getPlayer()->renderMap(window);
     world->getPlayer()->render(window);
     world->getPlayer()->renderMonsters(window);
+    world->getPlayer()->renderCursors(window);
     console->render(window);
 }
 
@@ -34,8 +35,13 @@ Game::~Game() {
 }
 
 bool Game::movePlayer(direction dir) {
+    // Check if player is examining or moving
+    if (getPlayer()->isExamining()) {
+        getPlayer()->moveFocus(dir);
+        return true;
+    }
     // Check for monsters in this direction
-    Point movingTo = getPlayer()->getAdjacentLocation(dir);
+    Point movingTo = getPlayer()->getAdjacentPoint(dir);
     WorldMap* worldMap = getPlayer()->getWorldMap();
     auto creaturesHere = getCreaturesAt(movingTo, worldMap);
     if (!creaturesHere.empty()) {

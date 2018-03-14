@@ -52,6 +52,11 @@ int main() {
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 window.close();
+            if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::Escape) {
+                    game->getPlayer()->cancelAll();
+                }
+            }
             if (event.type == sf::Event::TextEntered) {
                 unsigned int key = event.text.unicode;
                 bool moved = true;
@@ -69,6 +74,9 @@ int main() {
                 }
                 if (key == 'y' || key == '7') {
                     moved = game->movePlayer(northwest);
+                }
+                if (key == 'e') {
+                    game->getPlayer()->examine();
                 }
                 if (!moved)
                     game->logMessage(L"Ouch!");

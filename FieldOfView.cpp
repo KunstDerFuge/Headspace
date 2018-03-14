@@ -6,6 +6,7 @@
 #include <iostream>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include "FieldOfView.h"
+#include "Player.h"
 
 using namespace std;
 
@@ -30,13 +31,13 @@ int FieldOfView::getViewHeightTiles(int resolutionY, int tileWidth) {
     return viewHeightInTiles + 2;
 }
 
-FieldOfView::FieldOfView(Creature* creature, const sf::RenderWindow& window, int tileWidth, WorldMap* worldMap) {
+FieldOfView::FieldOfView(Player* player, const sf::RenderWindow& window, int tileWidth, WorldMap* worldMap) {
     start_angle = nullptr;
     end_angle = nullptr;
     allocated = 0;
     auto mapViewportWidth = float(1.f - CONSOLE_WIDTH);
     auto windowSize = window.getSize();
-    this->creature = creature;
+    this->player = player;
     cout << "Window size at FOV creation: " << windowSize.x << "x" << windowSize.y << endl;
     auto mapRenderSize = sf::Vector2i(static_cast<int>(windowSize.x * mapViewportWidth), windowSize.y);
     this->width = getViewWidthTiles(mapRenderSize.x, tileWidth);
@@ -74,9 +75,10 @@ long FieldOfView::mapCoordToIndex(long x, long y) {
 
 void FieldOfView::update() {
     long square = 0;
-    auto creatureLocation = creature->getLocation();
-    this->left = creatureLocation.x - width / 2;
-    this->top = creatureLocation.y - height / 2;
+    auto playerLocation = player->getLocation();
+    auto focus = player->getFocus();
+    this->left = focus.x - width / 2;
+    this->top = focus.y - height / 2;
     for (long y = top; y < top + height; ++y) {
         for (long x = left; x < left + width; ++x) {
             cells[square].transparent = !worldMap->isOpaque(Point(x, y));
@@ -102,11 +104,11 @@ void FieldOfView::update() {
     }
 
     /*set PC's position as visible */
-    cells[mapCoordToIndex(creatureLocation.x, creatureLocation.y)].visible = true;
+    cells[mapCoordToIndex(playerLocation.x, playerLocation.y)].visible = true;
 
     /*compute the 4 quadrants of the map */
-    int centerX = static_cast<int>(creatureLocation.x - left);
-    int centerY = static_cast<int>(creatureLocation.y - top);
+    int centerX = static_cast<int>(playerLocation.x - left);
+    int centerY = static_cast<int>(playerLocation.y - top);
     computeQuadrant(centerX, centerY, 1, 1);
     computeQuadrant(centerX, centerY, 1, -1);
     computeQuadrant(centerX, centerY, -1, 1);
@@ -116,7 +118,7 @@ void FieldOfView::update() {
 void FieldOfView::computeQuadrant(int player_x, int player_y, int dx, int dy) {
     FieldOfView* m = this;
     bool light_walls = true;
-    int max_radius = 1000;
+    int max_radius = 200;
     /*octant: vertical edge */
     {
         int iteration = 1; /*iteration of the algo for this octant */

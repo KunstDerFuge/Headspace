@@ -36,8 +36,11 @@ struct VisibleMap {
 class Player : public Creature {
 private:
     sf::Texture* texture;
+    sf::Texture* cursorTexture;
     FieldOfView* fov;
     VisibleMap* visibleMap;
+    bool examining;
+    Point* focus;
 
 public:
     bool shouldRedrawMap;
@@ -53,8 +56,17 @@ public:
     void resizeFOV(sf::RenderWindow& window);
     void resizeVisible();
     void renderMap(sf::RenderWindow& window);
+    void renderCursors(sf::RenderWindow& window);
     void render(sf::RenderWindow& window);
     void placeInWorldMap(WorldMap* worldMap);
+    Point getFocus();
+    VisibleMap* getVisibleMap();
+    void examine();
+    void cancelAll();
+    bool isExamining() {
+        return examining;
+    }
+    void moveFocus(direction dir);
 
     void renderMonsters(sf::RenderWindow &window);
 };
