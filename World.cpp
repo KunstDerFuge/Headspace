@@ -9,9 +9,9 @@
 
 using namespace std;
 
-World::World(const sf::RenderWindow& window) {
+World::World(const sf::RenderTexture& mapWindow) {
     overworld = new WorldMap();
-    player = new Player(Point(0, 0), overworld, window);
+    player = new Player(Point(0, 0), overworld, mapWindow);
     player->placeInWorldMap(overworld);
     creatures.push_back(new Creature(Point(1, 1), overworld));
     creatures.push_back(creatures[0]->generateRandom(SIZE_LARGE, overworld));
@@ -19,7 +19,7 @@ World::World(const sf::RenderWindow& window) {
         creatures.push_back(creatures[0]->generateRandom(SIZE_COLOSSAL, overworld));
 }
 
-void World::renderMap(sf::RenderWindow& window) {
+void World::renderMap(sf::RenderTexture& window) {
     overworld->render(window, player);
 }
 

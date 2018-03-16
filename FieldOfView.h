@@ -8,7 +8,6 @@
 
 #include <vector>
 #include "Creature.h"
-#include "include/libtcod.hpp"
 
 struct Cell {
     bool visible;
@@ -39,8 +38,8 @@ public:
     bool isVisible(Point location);
     void markAsVisible(long x, long y);
     void update();
-    void invalidate(int tileWidth, const sf::RenderWindow& window);
-    FieldOfView(Player* player, const sf::RenderWindow& window, int tileWidth, WorldMap* worldMap);
+    void invalidate(int tileWidth, const sf::RenderTexture& mapWindow);
+    FieldOfView(Player* player, const sf::RenderTexture& mapWindow, int tileWidth, WorldMap* worldMap);
     int getWidth();
     int getHeight();
     long getTop();

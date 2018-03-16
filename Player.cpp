@@ -4,6 +4,7 @@
 
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <iostream>
+#include <SFML/Graphics/Shader.hpp>
 #include "Player.h"
 #include "FieldOfView.h"
 
@@ -29,13 +30,13 @@ using namespace std;
 //    inventory = new Inventory();
 //}
 
-Player::Player(Point location, WorldMap* worldMap, const sf::RenderWindow& window) : Creature(location, worldMap) {
+Player::Player(Point location, WorldMap* worldMap, const sf::RenderTexture& mapWindow) : Creature(location, worldMap) {
     shouldRedrawMap = true;
     texture = new sf::Texture;
     texture->loadFromFile(graphicsPath() + "/sample.png");
     cursorTexture = new sf::Texture;
     cursorTexture->loadFromFile(graphicsPath() + "/cursor.png");
-    fov = new FieldOfView(this, window, TILE_WIDTH, worldMap);
+    fov = new FieldOfView(this, mapWindow, TILE_WIDTH, worldMap);
     visibleMap = new VisibleMap(fov, worldMap);
     focus = nullptr;
     examining = false;
@@ -45,7 +46,7 @@ sf::Vector2f Player::getPlayerCenter() {
     return {location.x*TILE_WIDTH + (TILE_WIDTH/2), location.y*TILE_WIDTH + (TILE_WIDTH/2)};
 }
 
-void Player::render(sf::RenderWindow& window) {
+void Player::render(sf::RenderTexture& window) {
     sf::RectangleShape tile;
     sf::Vector2f mapCenter = visibleMap->getCenter();
     float halfTileWidth = TILE_WIDTH / 2.f;
@@ -109,8 +110,8 @@ void Player::updateFOV() {
     fov->update();
 }
 
-void Player::resizeFOV(sf::RenderWindow &window) {
-    fov->invalidate(TILE_WIDTH, window);
+void Player::resizeFOV(sf::RenderTexture& mapWindow) {
+    fov->invalidate(TILE_WIDTH, mapWindow);
 }
 
 void Player::updateVisible() {
@@ -121,36 +122,39 @@ void Player::resizeVisible() {
     visibleMap->resize();
 }
 
-void Player::renderMap(sf::RenderWindow &window) {
+void Player::renderMap(sf::RenderTexture &mapWindow) {
     if (shouldRedrawMap) {
         updateFOV();
         updateVisible();
     }
     shouldRedrawMap = false;
     sf::View playerView;
-    auto mapViewportWidth = float(1.f - CONSOLE_WIDTH);
     auto visibleMapCenter = visibleMap->getCenter();
-    playerView.setViewport(sf::FloatRect(0.f, 0.f, mapViewportWidth, 1.f));
-    auto windowSize = window.getSize();
-    auto mapRenderSize = sf::Vector2f(int(windowSize.x * mapViewportWidth), windowSize.y);
-    playerView.setSize(mapRenderSize);
+    auto mapSize = mapWindow.getSize();
+    playerView.setSize(mapSize.x, mapSize.y);
     playerView.setCenter(visibleMapCenter);
-    window.setView(playerView);
-    window.draw(visibleMap->tileMap, visibleMap->texture);
+    mapWindow.setView(playerView);
+//    sf::Shader test;
+//    test.loadFromFile(shadersPath() + "/retro_texture.frag", sf::Shader::Fragment);
+//    test.setUniform("texture0", *visibleMap->texture);
+//    test.setUniform("pixelSize", sf::Vector2f(1.f/256.f, 1.f/256.f));
+    mapWindow.draw(visibleMap->tileMap, visibleMap->texture);
 }
 
-void Player::renderMonsters(sf::RenderWindow& window) {
+void Player::renderMonsters(sf::RenderTexture& mapWindow) {
     auto creatures = *worldMap->getCreatures();
     for (auto &creature : creatures) {
         if (!visibleMap->isOnScreen(creature->getLocation()))
             continue;
         if (fov->isVisible(creature->getLocation())) {
-            creature->render(texture, visibleMap, window);
+            creature->render(texture, visibleMap, mapWindow);
         }
     }
 }
 
 void Player::examine() {
+    if (examining)
+        return;
     examining = true;
     focus = new Point(location);
 }
@@ -182,13 +186,13 @@ VisibleMap *Player::getVisibleMap() {
     return visibleMap;
 }
 
-void Player::renderCursors(sf::RenderWindow& window) {
+void Player::renderCursors(sf::RenderTexture& mapWindow) {
     if (examining) {
         sf::RectangleShape cursor;
         cursor.setPosition(visibleMap->getRenderCoord(getFocus()));
         cursor.setSize(sf::Vector2f(TILE_WIDTH, TILE_WIDTH));
         cursor.setTexture(cursorTexture);
-        window.draw(cursor);
+        mapWindow.draw(cursor);
     }
 }
 

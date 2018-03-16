@@ -31,17 +31,15 @@ int FieldOfView::getViewHeightTiles(int resolutionY, int tileWidth) {
     return viewHeightInTiles + 2;
 }
 
-FieldOfView::FieldOfView(Player* player, const sf::RenderWindow& window, int tileWidth, WorldMap* worldMap) {
+FieldOfView::FieldOfView(Player* player, const sf::RenderTexture& mapWindow, int tileWidth, WorldMap* worldMap) {
     start_angle = nullptr;
     end_angle = nullptr;
     allocated = 0;
-    auto mapViewportWidth = float(1.f - CONSOLE_WIDTH);
-    auto windowSize = window.getSize();
+    auto mapSize = mapWindow.getSize();
     this->player = player;
-    cout << "Window size at FOV creation: " << windowSize.x << "x" << windowSize.y << endl;
-    auto mapRenderSize = sf::Vector2i(static_cast<int>(windowSize.x * mapViewportWidth), windowSize.y);
-    this->width = getViewWidthTiles(mapRenderSize.x, tileWidth);
-    this->height = getViewHeightTiles(mapRenderSize.y, tileWidth);
+    cout << "Window size at FOV creation: " << mapSize.x << "x" << mapSize.y << endl;
+    this->width = getViewWidthTiles(mapSize.x, tileWidth);
+    this->height = getViewHeightTiles(mapSize.y, tileWidth);
     if (width % 2 == 0) --width;
     if (height % 2 == 0) --height;
     cout << "FOV map dimensions: " << this->width << "x" << this->height << endl;
@@ -52,12 +50,10 @@ FieldOfView::FieldOfView(Player* player, const sf::RenderWindow& window, int til
     this->worldMap = worldMap;
 }
 
-void FieldOfView::invalidate(int tileWidth, const sf::RenderWindow& window) {
-    auto mapViewportWidth = float(1.f - CONSOLE_WIDTH);
-    auto windowSize = window.getSize();
-    auto mapRenderSize = sf::Vector2i(static_cast<int>(windowSize.x * mapViewportWidth), windowSize.y);
-    this->width = getViewWidthTiles(mapRenderSize.x, tileWidth);
-    this->height = getViewHeightTiles(mapRenderSize.y, tileWidth);
+void FieldOfView::invalidate(int tileWidth, const sf::RenderTexture& mapWindow) {
+    auto mapSize = mapWindow.getSize();
+    this->width = getViewWidthTiles(mapSize.x, tileWidth);
+    this->height = getViewHeightTiles(mapSize.y, tileWidth);
     if (width % 2 == 0) --width;
     if (height % 2 == 0) --height;
     cout << "FOV is now " << width << "x" << height << endl;

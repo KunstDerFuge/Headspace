@@ -13,7 +13,7 @@ class Game {
 private:
     World* world;
     Console* console;
-    sf::Texture lastState;
+    sf::RenderTexture mapWindow;
 public:
     void logMessage(std::wstring message, message_type type=info);
     bool movePlayer(direction dir);
@@ -21,7 +21,10 @@ public:
     Console* getConsole() {return console;}
     std::vector<Creature*> getCreaturesAt(Point location, WorldMap* worldMap);
     void render(sf::RenderWindow& window);
-    Game(const sf::RenderWindow& window);
+    sf::RenderTexture& getMapWindow();
+    void resizeMapWindow(sf::RenderWindow& window);
+
+    explicit Game(const sf::RenderWindow& window);
     ~Game();
 };
 

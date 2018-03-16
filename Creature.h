@@ -59,7 +59,7 @@ public:
     Point getLocation();
     WorldMap* getWorldMap();
     Point getAdjacentPoint(direction dir);
-    void render(sf::Texture* texture, VisibleMap* visibleMap, sf::RenderWindow& window);
+    void render(sf::Texture* texture, VisibleMap* visibleMap, sf::RenderTexture& mapWindow);
 };
 
 

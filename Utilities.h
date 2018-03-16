@@ -10,6 +10,7 @@
 #include <SFML/System.hpp>
 #include <map>
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/RenderTexture.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
 #define CHUNK_WIDTH 64  // Width and height of a chunk in tiles
@@ -42,7 +43,7 @@ struct Tile {
     sf::Texture* texture;
     int textureWidthTiles;
     int textureHeightTiles;
-    void render(long x, long y, sf::RenderWindow& window, bool inFOV=true);
+    void render(long x, long y, sf::RenderTexture& mapWindow, bool inFOV=true);
     explicit Tile(terrainType terrain, int textureWidth=1, int textureHeight=1);
 };
 

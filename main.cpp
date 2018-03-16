@@ -7,7 +7,8 @@ using namespace std;
 
 int main() {
 
-    sf::RenderWindow window(sf::VideoMode(1024, 768), "Headspace");
+    sf::RenderWindow window(sf::VideoMode(320, 256), "Headspace");
+
     auto game = new Game(window);
 
     window.setFramerateLimit(60);
@@ -82,8 +83,9 @@ int main() {
                     game->logMessage(L"Ouch!");
             }
             if (event.type == sf::Event::Resized) {
+                game->resizeMapWindow(window);
                 game->getPlayer()->shouldRedrawMap = true;
-                game->getPlayer()->resizeFOV(window);
+                game->getPlayer()->resizeFOV(game->getMapWindow());
                 game->getPlayer()->resizeVisible();
             }
         }

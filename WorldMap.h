@@ -38,7 +38,7 @@ public:
     Chunk* getChunk(long x, long y);
     void generateChunk(long x, long y, WorldMap* worldMap);
     bool chunkExists(long x, long y);
-    void render(sf::RenderWindow& window, Player* player);
+    void render(sf::RenderTexture& mapWindow, Player* player);
     Tile* getUniqueTile(int tileNumber);
     bool isWalkable(Point coord);
     bool isWalkable(Player* player, direction dir);

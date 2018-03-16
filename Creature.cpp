@@ -132,12 +132,12 @@ Point Creature::getLocation() {
     return location;
 }
 
-void Creature::render(sf::Texture* texture, VisibleMap* visibleMap, sf::RenderWindow& window) {
+void Creature::render(sf::Texture* texture, VisibleMap* visibleMap, sf::RenderTexture& mapWindow) {
     sf::RectangleShape tile;
     tile.setPosition(visibleMap->getRenderCoord(location));
     tile.setSize(sf::Vector2f(TILE_WIDTH, TILE_WIDTH));
     tile.setTexture(texture);
-    window.draw(tile);
+    mapWindow.draw(tile);
 }
 
 WorldMap *Creature::getWorldMap() {

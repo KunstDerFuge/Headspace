@@ -6,6 +6,7 @@
 #define HEADSPACE_PLAYER_H
 
 #include <SFML/Graphics/VertexArray.hpp>
+#include <SFML/Graphics/RenderTexture.hpp>
 
 #include "Inventory.h"
 #include "WorldMap.h"
@@ -44,7 +45,7 @@ private:
 
 public:
     bool shouldRedrawMap;
-    Player(Point location, WorldMap* worldMap, const sf::RenderWindow& window);
+    Player(Point location, WorldMap* worldMap, const sf::RenderTexture& mapWindow);
     void takeDamage(int amount);
     bool addToInventory(Item* item);
     sf::Vector2f getPlayerCenter();
@@ -53,22 +54,19 @@ public:
     bool canSee(long x, long y);
     void updateFOV();
     void updateVisible();
-    void resizeFOV(sf::RenderWindow& window);
+    void resizeFOV(sf::RenderTexture& mapWindow);
     void resizeVisible();
-    void renderMap(sf::RenderWindow& window);
-    void renderCursors(sf::RenderWindow& window);
-    void render(sf::RenderWindow& window);
+    void renderMap(sf::RenderTexture& mapWindow);
+    void renderCursors(sf::RenderTexture& mapWindow);
+    void render(sf::RenderTexture& mapWindow);
+    void renderMonsters(sf::RenderTexture &mapWindow);
     void placeInWorldMap(WorldMap* worldMap);
     Point getFocus();
     VisibleMap* getVisibleMap();
     void examine();
     void cancelAll();
-    bool isExamining() {
-        return examining;
-    }
+    bool isExamining() { return examining; }
     void moveFocus(direction dir);
-
-    void renderMonsters(sf::RenderWindow &window);
 };
 
 

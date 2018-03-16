@@ -21,9 +21,9 @@ private:
     Player* player;
     WorldMap* overworld;
 public:
-    explicit World(const sf::RenderWindow& window);
+    explicit World(const sf::RenderTexture& mapWindow);
     ~World();
-    void renderMap(sf::RenderWindow& window);
+    void renderMap(sf::RenderTexture& mapWindow);
     WorldMap* getOverworld();
     Player* getPlayer() {
         return player;

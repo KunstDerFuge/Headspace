@@ -234,7 +234,7 @@ bool Point::operator==(const Point &other) {
     return this->x == other.x && this->y == other.y;
 }
 
-void Tile::render(long x, long y, sf::RenderWindow& window, bool inFOV) {
+void Tile::render(long x, long y, sf::RenderTexture& mapWindow, bool inFOV) {
     sf::RectangleShape tile;
     tile.setPosition(tileToRenderCoord(x, y));
     tile.setSize(sf::Vector2f(TILE_WIDTH, TILE_WIDTH));
@@ -247,7 +247,7 @@ void Tile::render(long x, long y, sf::RenderWindow& window, bool inFOV) {
         tile.setTexture(this->texture);
         tile.setTextureRect(sf::IntRect(textureXCoord, textureYCoord, 32, 32));
     }
-    window.draw(tile);
+    mapWindow.draw(tile);
 }
 
 Tile::Tile(terrainType terrain, int textureWidth, int textureHeight) {

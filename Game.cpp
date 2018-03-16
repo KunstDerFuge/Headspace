@@ -5,6 +5,7 @@
 #include <SFML/Graphics/RenderTexture.hpp>
 #include <vector>
 #include <iostream>
+#include <SFML/Graphics/Sprite.hpp>
 #include "Game.h"
 #include "Creature.h"
 
@@ -15,17 +16,26 @@ void Game::logMessage(std::wstring message, message_type type) {
 }
 
 Game::Game(const sf::RenderWindow& window) {
-    world = new World(window);
+    auto mapRenderWidth = static_cast<unsigned int>(window.getSize().x * (1.f - CONSOLE_WIDTH));
+    mapWindow.create(mapRenderWidth, window.getSize().y);
+    world = new World(mapWindow);
     console = new Console();
 }
 
 void Game::render(sf::RenderWindow &window) {
     window.clear(sf::Color::Black);
+    mapWindow.clear(sf::Color::Black);
     //world->renderMap(window);
-    world->getPlayer()->renderMap(window);
-    world->getPlayer()->render(window);
-    world->getPlayer()->renderMonsters(window);
-    world->getPlayer()->renderCursors(window);
+    world->getPlayer()->renderMap(mapWindow);
+    world->getPlayer()->render(mapWindow);
+    world->getPlayer()->renderMonsters(mapWindow);
+    world->getPlayer()->renderCursors(mapWindow);
+    sf::Sprite mapWindowSprite;
+    sf::Vector2f windowSize(window.getSize().x, window.getSize().y);
+    mapWindowSprite.setTexture(mapWindow.getTexture());
+    mapWindowSprite.setScale(1.f, -1.f);
+    mapWindowSprite.setPosition(0, windowSize.y);
+    window.draw(mapWindowSprite);
     console->render(window);
 }
 
@@ -59,5 +69,14 @@ std::vector<Creature*> Game::getCreaturesAt(Point location, WorldMap* worldMap) 
             creaturesHere.push_back(creature);
     }
     return creaturesHere;
+}
+
+sf::RenderTexture &Game::getMapWindow() {
+    return mapWindow;
+}
+
+void Game::resizeMapWindow(sf::RenderWindow &window) {
+    auto mapRenderWidth = static_cast<unsigned int>(window.getSize().x * (1.f - CONSOLE_WIDTH));
+    mapWindow.create(mapRenderWidth, window.getSize().y);
 }
 

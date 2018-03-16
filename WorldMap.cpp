@@ -92,13 +92,13 @@ WorldMap::WorldMap() {
     }
 }
 
-void WorldMap::render(sf::RenderWindow& window, Player* player) {
+void WorldMap::render(sf::RenderTexture& mapWindow, Player* player) {
     if (player->shouldRedrawMap)
         player->updateFOV();
     player->shouldRedrawMap = false;
     auto mapViewportWidth = float(1.f - CONSOLE_WIDTH);
     auto playerLocation = player->getLocation();
-    auto windowSize = window.getSize();
+    auto windowSize = mapWindow.getSize();
     auto mapRenderSize = sf::Vector2f(windowSize.x * mapViewportWidth, windowSize.y);
     auto viewWidthInTiles = int(mapRenderSize.x / TILE_WIDTH);
     auto viewHeightInTiles = int(mapRenderSize.y / TILE_WIDTH);
@@ -109,18 +109,18 @@ void WorldMap::render(sf::RenderWindow& window, Player* player) {
     long upperLeftTileY = playerLocation.y - renderHeightInTiles / 2;
     playerView.setViewport(sf::FloatRect(0.f, 0.f, mapViewportWidth, 1.f));
     playerView.setSize(mapRenderSize);
-    window.setView(playerView);
+    mapWindow.setView(playerView);
 
     // Render map
     for (long x = upperLeftTileX; x < upperLeftTileX + renderWidthInTiles; ++x) {
         for (long y = upperLeftTileY; y < upperLeftTileY + renderHeightInTiles; ++y) {
             auto tile = getTile(Point(x, y));
-            getTile(Point(x, y))->render(x, y, window, player->canSee(x, y));
+            getTile(Point(x, y))->render(x, y, mapWindow, player->canSee(x, y));
         }
     }
 
     // Render player
-    player->render(window);
+    player->render(mapWindow);
 
 }
 
@@ -171,8 +171,7 @@ bool WorldMap::isWalkable(Player* player, direction dir) {
         case southeast:
             offsetX = 1;
             offsetY = 1;
-            break;
-    }
+            break; }
     Point playerLocation = player->getLocation();
     return isWalkable(Point(playerLocation.x + offsetX, playerLocation.y + offsetY));
 }
@@ -188,7 +187,7 @@ Tile* Chunk::getTile(long x, long y) {
 Chunk::Chunk(WorldMap* worldMap) {
     for (auto& column : tiles) {
         for (auto& tile : column) {
-            if (randomBool(0.99)) {
+            if (randomBool(0.993)) {
                 tile = worldMap->getUniqueTile(0);
             }
             else {
