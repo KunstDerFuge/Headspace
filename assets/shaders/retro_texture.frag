@@ -17,7 +17,7 @@ out vec4 out_Color;
 
 // width of a pixel in texture units,
 // should be set to 1 / width, 1 / height.
-uniform vec2 pixelSize =  vec2(1.0/(128.0), 1.0/(128.0) );
+uniform vec2 pixelSize;
 
 // how sharp the bilinear filter is, 0 - 1
 const float sharpness = 0.75;

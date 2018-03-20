@@ -6,6 +6,7 @@
 #include <vector>
 #include <iostream>
 #include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Shader.hpp>
 #include "Game.h"
 #include "Creature.h"
 
@@ -32,9 +33,17 @@ void Game::render(sf::RenderWindow &window) {
     world->getPlayer()->renderCursors(mapWindow);
     sf::Sprite mapWindowSprite;
     sf::Vector2f windowSize(window.getSize().x, window.getSize().y);
-    mapWindowSprite.setTexture(mapWindow.getTexture());
+    sf::Texture mapWindowTexture = mapWindow.getTexture();
+    mapWindowSprite.setTexture(mapWindowTexture);
     mapWindowSprite.setScale(1.f, -1.f);
     mapWindowSprite.setPosition(0, windowSize.y);
+
+    // MAP-LEVEL SHADERS GO HERE
+//    sf::Shader crt;
+//    crt.loadFromFile(shadersPath() + "/shader-laferriere.frag", sf::Shader::Fragment);
+//    crt.setUniform("u_texture", mapWindowTexture);
+//    crt.setUniform("sourceSize", sf::Vector2f(mapWindow.getSize().x/1.f, mapWindow.getSize().y/1.f));
+
     window.draw(mapWindowSprite);
     console->render(window);
 }

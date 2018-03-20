@@ -134,10 +134,6 @@ void Player::renderMap(sf::RenderTexture &mapWindow) {
     playerView.setSize(mapSize.x, mapSize.y);
     playerView.setCenter(visibleMapCenter);
     mapWindow.setView(playerView);
-//    sf::Shader test;
-//    test.loadFromFile(shadersPath() + "/retro_texture.frag", sf::Shader::Fragment);
-//    test.setUniform("texture0", *visibleMap->texture);
-//    test.setUniform("pixelSize", sf::Vector2f(1.f/256.f, 1.f/256.f));
     mapWindow.draw(visibleMap->tileMap, visibleMap->texture);
 }
 
